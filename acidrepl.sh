@@ -17,9 +17,14 @@ source ./env.sh
 # Source common functions
 #
 source ./repl-common.sh
+trap trap_log INT
 
-script_usage()
-{
+trap_log() {
+printmessage "Ctrl-C attempted. Aborting!"
+}
+
+script_usage() {
+
   echo -e "Usage : ${BASENAME} [target-database-name] [debug] \n"
   echo -e "**  This script is to be run on your target cluster. When run without \n"
   echo -e "**  database name as argument, the target database name is considered \n"
@@ -33,6 +38,10 @@ INC_DUMP_HQL="${HQL_DIR}/replbootstrap.hql"
 LOAD_HQL="${HQL_DIR}/replload.hql"
 STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
+last_repl_id=""
+dump_path=""
+dump_txid=""
+
 retrieve_current_target_repl_id() {
 
 # ----------------------------------------------------------------------------
@@ -44,13 +53,14 @@ repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -f ${STATUS_HQL} >repl_status_beeline.out 2>>${repl_log_file} )
 
  if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL STATUS Beeline output \n "
+   printmessage "REPL STATUS Beeline output : "
    cat repl_status_beeline.out >> ${repl_log_file}
  fi
 
 last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_status_beeline.out )
 
-echo ${last_repl_id}
+[[ ${last_repl_id} =~ ${re} ]] && return 0
+return 1
 
 }
 
@@ -65,7 +75,7 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -f ${BOOTSTRAP_HQL} 1>beeline.op 2>>${repl_log_file})
 
 if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "Beeline output \n"
+   printmessage "Beeline output :"
    cat beeline.op >> ${repl_log_file}
 fi
 
@@ -104,7 +114,7 @@ dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_dump_beeline.out)
 dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' repl_dump_beeline.out)
 
 if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL DUMP Beeline output \n"
+   printmessage "REPL DUMP Beeline output :"
    cat repl_dump_beeline.out >> ${repl_log_file}
 fi
 
@@ -132,7 +142,7 @@ replay_dump_at_target(){
 
 # Add prefix for source cluster to dump directory when running at target cluster
 src_dump_path="${source_hdfs_prefix}${dump_path}"
-
+echo $src_dump_path
 repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${targetdbname} \
@@ -140,7 +150,7 @@ repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -f ${LOAD_HQL} >repl_load_beeline.out 2>>${repl_log_file})
 
 if [[ "${loglevel}" == "$DEBUG" ]]; then
-  printmessage "REPL LOAD Beeline output \n"
+  printmessage "REPL LOAD Beeline output :"
   cat repl_load_beeline.out >> ${repl_log_file}
 fi
 
@@ -196,7 +206,7 @@ re='^[0-9]+$'
 dump_path=""
 
 # Retrieve the current state of replication in the target cluster.
-last_repl_id=$(retrieve_current_target_repl_id)
+retrieve_current_target_repl_id
 
 if [[ ${last_repl_id} == "NULL" ]] ; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
@@ -205,7 +215,8 @@ if [[ ${last_repl_id} == "NULL" ]] ; then
   if [[ ${fulldumpconfirmation} == "Y" ]]; then
     printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
     # dump generation command returns latest transaction id at source
-    source_latest_txid=$(gen_bootstrap_dump_source)
+    gen_bootstrap_dump_source
+    source_latest_txid=${dump_txid}
 
     if [[ ${source_latest_txid} > 0 ]]; then
       printmessage "Database ${dbname} full dump has been generated at ${dump_path}."
@@ -225,20 +236,24 @@ if [[ ${last_repl_id} == "NULL" ]] ; then
 
 elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${dbname} transaction ID at target is currently ${last_repl_id}"
-  source_latest_txid=$(gen_incremental_dump_source)
+  gen_incremental_dump_source
+  source_latest_txid=${dump_txid}
+
   if [[ ${source_latest_txid} > 0 ]]; then
     printmessage "Database ${dbname} incremental dump has been generated at ${dump_path}."
     printmessage "The current transaction ID at source is ${source_latest_txid}"
     txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
-    replay_dump_at_target
+    replay_dump_at_target || printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!"
   else
     printmessage "Invalid latest transaction id returned from Source : ${source_latest_txid}"
     printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!."
     exit 1
   fi
+
 else
   printmessage "Invalid value for last replicated transaction id: ${last_repl_id}. Database dump failed"
   echo -e "See ${repl_log_file} for details. Exiting!"
   exit 1
 fi
+
