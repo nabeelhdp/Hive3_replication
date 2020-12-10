@@ -41,14 +41,14 @@ retrieve_current_target_repl_id() {
 repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${targetdbname} \
- -f ${STATUS_HQL} >beeline.op 2>>${repl_log_file} )
+ -f ${STATUS_HQL} >repl_status_beeline.out 2>>${repl_log_file} )
 
  if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "Beeline output \n "
-   cat beeline.op >> ${repl_log_file}
+   printmessage "REPL STATUS Beeline output \n "
+   cat repl_status_beeline.out >> ${repl_log_file}
  fi
 
-last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' beeline.op )
+last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_status_beeline.out )
 
 echo ${last_repl_id}
 
@@ -97,23 +97,32 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  --hivevar last_repl_id=${last_repl_id} \
- -f ${INC_DUMP_HQL} 1>beeline.op  2>>${repl_log_file})
-
-if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "Beeline output \n"
-   cat beeline.op >> ${repl_log_file}
-fi
+ -f ${INC_DUMP_HQL} >repl_dump_beeline.out  2>>${repl_log_file})
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' beeline.op)
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' beeline.op)
+dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_dump_beeline.out)
+dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' repl_dump_beeline.out)
+
+if [[ "${loglevel}" == "DEBUG" ]]; then
+   printmessage "REPL DUMP Beeline output \n"
+   cat repl_dump_beeline.out >> ${repl_log_file}
+fi
 
 # Confirm database dump succeeded
 
-if [[ ${dump_path} != /app* ]]
+if [[ ${dump_path} != ${repl_root}* ]]
  then
- echo -e "Could not dump database \n${repl_dump_output}"
+  printmessage "Could not generate database dump for ${dbname} at source.\n"
+  # If debug is enabled, the output would already be written earlier. So
+  # skipping a write of output into log a second time.
+  if [[ "${loglevel}" == "INFO" ]]; then
+     cat repl_dump_beeline.out  >> ${repl_log_file}
+  fi
+  return 0
+else
+  return ${dump_txid}
 fi
+
 }
 
 replay_dump_at_target(){
@@ -128,27 +137,20 @@ repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${targetdbname} \
  --hivevar src_dump_path=${src_dump_path} \
- -f ${LOAD_HQL} 1>beeline.op 2>>${repl_log_file})
+ -f ${LOAD_HQL} >repl_load_beeline.out 2>>${repl_log_file})
 
 if [[ "${loglevel}" == "$DEBUG" ]]; then
-  printmessage "Beeline output \n${repl_load_output}"
+  printmessage "REPL LOAD Beeline output \n"
+  cat repl_load_beeline.out >> ${repl_log_file}
 fi
 
 # Confirm database load succeeded
 #
-if [[ ${dump_path} != ${repl_root}* ]]
- then
-  printmessage "Could not generate database dump for ${dbname} at source.\n"
-  # If debug is enabled, the output would already be written earlier. So
-  # skipping a write of output into log a second time.
-  if [[ "${loglevel}" == "INFO" ]]; then
-     cat beeline.op >> ${repl_log_file}
-  fi
-  return 0
-else
-  return ${dump_txid}
-fi
+# return 0 returns to where the function was called.  $? contains 0 (success).
+# return 1 returns to where the function was called.  $? contains 1 (failure).
 
+grep "INFO  : OK" repl_load_beeline.out  && return 0
+return 1
 }
 
 ################ FLOW BEGINS HERE #########################
@@ -199,23 +201,28 @@ last_repl_id=$(retrieve_current_target_repl_id)
 if [[ ${last_repl_id} == "NULL" ]] ; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
   read  -n 1 -p "Continue with full dump ? Y:N" fulldumpconfirmation
+
   if [[ ${fulldumpconfirmation} == "Y" ]]; then
     printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
     # dump generation command returns latest transaction id at source
     source_latest_txid=$(gen_bootstrap_dump_source)
+
     if [[ ${source_latest_txid} > 0 ]]; then
       printmessage "Database ${dbname} full dump has been generated at ${dump_path}."
       printmessage "The current transaction ID at source is ${source_latest_txid}"
       printmessage "There are ${source_latest_txid} transactions to be synced in this run."
-      replay_dump_at_target
+      printmessage "Initiating data load at target cluster on database ${targetdbname}."
+      replay_dump_at_target || printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!"
     else
       printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
       exit 1
     fi
+
   else
     echo "Aborting replication attempt. Exiting!"
     exit 1
   fi
+
 elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${dbname} transaction ID at target is currently ${last_repl_id}"
   source_latest_txid=$(gen_incremental_dump_source)
