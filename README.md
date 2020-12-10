@@ -1,4 +1,4 @@
-# acid_table_replication
+# Hive acid table replication
 
 Script to replicate a single database from an HDP cluster to another.
 Generally used for Prod to DR sync.
