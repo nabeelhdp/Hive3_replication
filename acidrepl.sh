@@ -25,7 +25,7 @@ script_usage()
   echo -e "**  database name as argument, the target database name is considered \n"
   echo -e "**  same as source defined in env.sh. \n"
   echo -e "**  Any database name passed is validated against dblist variable in env.sh. \n"
-  echo -e "**  DEBUG is optional. If not provided, logging will be done at INFO level. \n"
+  echo -e "**  DEBUG is optional. When set, DEBUG provides all beeline outputs in log.\n"
 }
 
 BOOTSTRAP_HQL="${HQL_DIR}/repldump.hql"
@@ -38,17 +38,19 @@ retrieve_current_target_repl_id() {
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target
 #
-repl_status_output=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
+repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${targetdbname} \
- -f ${STATUS_HQL} 2>>${repl_log_file})
+ -f ${STATUS_HQL} >beeline.op 2>>${repl_log_file} )
+
+repl_status_output=$(cat beeline.op)
 
  if [[ "${loglevel}" == "$DEBUG" ]]; then
-   printmessage "Beeline output \n${repl_status_output}"
+   printmessage "Beeline output \n ${repl_status_output}"
  fi
 
 last_repl_id=$(echo ${repl_status_output} | \
- awk -F\| '{gsub(/ /,"", $2);print $2}')
+ awk -F\| '(NR==1){gsub(/ /,"", $2);print $2}')
 
 echo ${last_repl_id}
 
@@ -59,10 +61,12 @@ gen_bootstrap_dump_source() {
 # ----------------------------------------------------------------------------
 # dump entire database at source hive instance for first time
 #
-repl_dump_output=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
+repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
- -f ${BOOTSTRAP_HQL} 2>>${repl_log_file})
+ -f ${BOOTSTRAP_HQL} 1>beeline.op 2>>${repl_log_file})
+
+repl_dump_output=$(cat beeline.op)
 
 if [[ "${loglevel}" == "$DEBUG" ]]; then
    printmessage "Beeline output \n${repl_dump_output}"
@@ -71,10 +75,10 @@ fi
  # Extract dump path and transaction id from the output
 
 dump_path=$(echo ${repl_dump_output} | \
- awk -F\| '{gsub(/ /,"", $2);print $2}')
+ awk -F\| '(NR==1){gsub(/ /,"", $2);print $2}')
 
 dump_txid=$(echo ${repl_dump_output} | \
- awk -F\| '{gsub(/ /,"", $2);print $3}')
+ awk -F\| '(NR==1){gsub(/ /,"", $2);print $3}')
 
  # Confirm database dump succeeded
 
@@ -91,11 +95,13 @@ gen_incremental_dump_source() {
 # ----------------------------------------------------------------------------
 # dump database at source hive instance from the last_repl_id at target
 #
-repl_dump_output=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
+repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  --hivevar last_repl_id=${last_repl_id} \
- -f ${INC_DUMP_HQL} 2>>${repl_log_file})
+ -f ${INC_DUMP_HQL} 1>beeline.op  2>>${repl_log_file})
+
+repl_dump_output=$(cat beeline.op)
 
 if [[ "${loglevel}" == "$DEBUG" ]]; then
   printmessage "Beeline output \n${repl_dump_output}"
@@ -104,10 +110,10 @@ fi
 # Extract dump path and transaction id from the output
 
 dump_path=$(echo ${repl_dump_output} | \
- awk -F\| '{gsub(/ /,"", $2);print $2}')
+ awk -F\| '(NR==1){gsub(/ /,"", $2);print $2}')
 
 dump_txid=$(echo ${repl_dump_output} | \
- awk -F\| '{gsub(/ /,"", $2);print $3}')
+ awk -F\| '(NR==1){gsub(/ /,"", $2);print $3}')
 
 # Confirm database dump succeeded
 
@@ -125,11 +131,13 @@ replay_dump_at_target(){
 # Add prefix for source cluster to dump directory when running at target cluster
 src_dump_path="${source_hdfs_prefix}${dump_path}"
 
-repl_load_output=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
+repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${targetdbname} \
  --hivevar src_dump_path=${src_dump_path} \
- -f ${LOAD_HQL} 2>>${repl_log_file})
+ -f ${LOAD_HQL} 1>beeline.op 2>>${repl_log_file})
+
+repl_load_output=$(cat beeline.op)
 
 if [[ "${loglevel}" == "$DEBUG" ]]; then
   printmessage "Beeline output \n${repl_load_output}"
@@ -138,7 +146,7 @@ fi
 # Confirm database load succeeded
 #
 load_status=$(echo ${repl_dump_output} | \
- awk -F\| '{gsub(/ /,"", $2);print $4}')
+ awk -F\| '(NR==1){gsub(/ /,"", $2);print $4}')
 
 if [[ ${dump_path} != /app* ]]
  then echo -e "Could not load database \n${beeline_op}"
@@ -170,9 +178,11 @@ if [[ ${dbvalidity} == "0" ]]; then
   targetdbname=${dbname}
 fi
 
+# Set debug if passed as first or second argument to script
 loglevel="INFO"
-[[ "$2" == "DEBUG" ]] || [[ "$2" == "debug" ]] && loglevel="DEBUG" && printmessage "Enabling DEBUG output"
-
+shopt -s nocasematch;
+[[ "$2" == "DEBUG" ]] || [[ "$1" == "debug" ]] && loglevel="DEBUG" && printmessage "Enabling DEBUG output"
+shopt -u nocasematch;
 
 printmessage "==================================================================="
 printmessage "Initiating run to replicate ${dbname} to ${targetdbname} "
@@ -201,7 +211,7 @@ if [[ ${last_repl_id} == "NULL" ]] ; then
       printmessage "There are ${source_latest_txid} transactions to be synced in this run."
       replay_dump_at_target
     else
-      printmessage "Unable to generate source dump for database ${dbname}. Exiting!."
+      printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
       exit 1
     fi
   else
@@ -209,20 +219,21 @@ if [[ ${last_repl_id} == "NULL" ]] ; then
     exit 1
   fi
 elif [[ ${last_repl_id} =~ ${re} ]] ; then
-  printmessage "Database ${dbname} transaction ID at target is currently ${dump_tid}"
+  printmessage "Database ${dbname} transaction ID at target is currently ${last_repl_id}"
   source_latest_txid=$(gen_incremental_dump_source)
   if [[ ${source_latest_txid} > 0 ]]; then
     printmessage "Database ${dbname} incremental dump has been generated at ${dump_path}."
     printmessage "The current transaction ID at source is ${source_latest_txid}"
-    txn_count=$((${dump_tid} - ${last_repl_id}))
+    txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
     replay_dump_at_target
   else
-    printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
+    printmessage "Invalid latest transaction id returned from Source : ${source_latest_txid}"
+    printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!."
     exit 1
   fi
 else
   printmessage "Invalid value for last replicated transaction id: ${last_repl_id}. Database dump failed"
-  printmessage "See ${repl_log_file} for details. Exiting!"
+  echo -e "See ${repl_log_file} for details. Exiting!"
   exit 1
 fi
