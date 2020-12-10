@@ -43,14 +43,12 @@ repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  --hivevar dbname=${targetdbname} \
  -f ${STATUS_HQL} >beeline.op 2>>${repl_log_file} )
 
-repl_status_output=$(cat beeline.op)
-
- if [[ "${loglevel}" == "$DEBUG" ]]; then
-   printmessage "Beeline output \n ${repl_status_output}"
+ if [[ "${loglevel}" == "DEBUG" ]]; then
+   printmessage "Beeline output \n "
+   cat beeline.op >> ${repl_log_file}
  fi
 
-last_repl_id=$(echo ${repl_status_output} | \
- awk -F\| '(NR==1){gsub(/ /,"", $2);print $2}')
+last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' beeline.op )
 
 echo ${last_repl_id}
 
@@ -66,25 +64,25 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  --hivevar dbname=${dbname} \
  -f ${BOOTSTRAP_HQL} 1>beeline.op 2>>${repl_log_file})
 
-repl_dump_output=$(cat beeline.op)
-
-if [[ "${loglevel}" == "$DEBUG" ]]; then
-   printmessage "Beeline output \n${repl_dump_output}"
+if [[ "${loglevel}" == "DEBUG" ]]; then
+   printmessage "Beeline output \n"
+   cat beeline.op >> ${repl_log_file}
 fi
 
  # Extract dump path and transaction id from the output
-
-dump_path=$(echo ${repl_dump_output} | \
- awk -F\| '(NR==1){gsub(/ /,"", $2);print $2}')
-
-dump_txid=$(echo ${repl_dump_output} | \
- awk -F\| '(NR==1){gsub(/ /,"", $2);print $3}')
+dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' beeline.op)
+dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' beeline.op)
 
  # Confirm database dump succeeded
 
 if [[ ${dump_path} != ${repl_root}* ]]
  then
-  printmessage "Could not dump database \n${repl_dump_output}"
+  printmessage "Could not generate database dump for ${dbname} at source.\n"
+  # If debug is enabled, the output would already be written earlier. So
+  # skipping a write of output into log a second time.
+  if [[ "${loglevel}" == "INFO" ]]; then
+     cat beeline.op >> ${repl_log_file}
+  fi
   return 0
 else
   return ${dump_txid}
@@ -101,19 +99,14 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  --hivevar last_repl_id=${last_repl_id} \
  -f ${INC_DUMP_HQL} 1>beeline.op  2>>${repl_log_file})
 
-repl_dump_output=$(cat beeline.op)
-
-if [[ "${loglevel}" == "$DEBUG" ]]; then
-  printmessage "Beeline output \n${repl_dump_output}"
+if [[ "${loglevel}" == "DEBUG" ]]; then
+   printmessage "Beeline output \n"
+   cat beeline.op >> ${repl_log_file}
 fi
 
 # Extract dump path and transaction id from the output
-
-dump_path=$(echo ${repl_dump_output} | \
- awk -F\| '(NR==1){gsub(/ /,"", $2);print $2}')
-
-dump_txid=$(echo ${repl_dump_output} | \
- awk -F\| '(NR==1){gsub(/ /,"", $2);print $3}')
+dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' beeline.op)
+dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' beeline.op)
 
 # Confirm database dump succeeded
 
@@ -137,20 +130,25 @@ repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  --hivevar src_dump_path=${src_dump_path} \
  -f ${LOAD_HQL} 1>beeline.op 2>>${repl_log_file})
 
-repl_load_output=$(cat beeline.op)
-
 if [[ "${loglevel}" == "$DEBUG" ]]; then
   printmessage "Beeline output \n${repl_load_output}"
 fi
 
 # Confirm database load succeeded
 #
-load_status=$(echo ${repl_dump_output} | \
- awk -F\| '(NR==1){gsub(/ /,"", $2);print $4}')
-
-if [[ ${dump_path} != /app* ]]
- then echo -e "Could not load database \n${beeline_op}"
+if [[ ${dump_path} != ${repl_root}* ]]
+ then
+  printmessage "Could not generate database dump for ${dbname} at source.\n"
+  # If debug is enabled, the output would already be written earlier. So
+  # skipping a write of output into log a second time.
+  if [[ "${loglevel}" == "INFO" ]]; then
+     cat beeline.op >> ${repl_log_file}
+  fi
+  return 0
+else
+  return ${dump_txid}
 fi
+
 }
 
 ################ FLOW BEGINS HERE #########################
