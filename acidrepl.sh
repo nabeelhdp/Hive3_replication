@@ -17,11 +17,8 @@ source ./env.sh
 # Source common functions
 #
 source ./repl-common.sh
-trap trap_log INT
 
-trap_log() {
-printmessage "Ctrl-C attempted. Aborting!"
-}
+trap trap_log INT
 
 script_usage() {
 
@@ -32,11 +29,6 @@ script_usage() {
   echo -e "**  Any database name passed is validated against dblist variable in env.sh. \n"
   echo -e "**  DEBUG is optional. When set, DEBUG provides all beeline outputs in log.\n"
 }
-
-BOOTSTRAP_HQL="${HQL_DIR}/repldump.hql"
-INC_DUMP_HQL="${HQL_DIR}/replbootstrap.hql"
-LOAD_HQL="${HQL_DIR}/replload.hql"
-STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
 last_repl_id=""
 dump_path=""
@@ -72,16 +64,16 @@ gen_bootstrap_dump_source() {
 repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
- -f ${BOOTSTRAP_HQL} 1>beeline.op 2>>${repl_log_file})
+ -f ${BOOTSTRAP_HQL} >repl_fulldump_beeline.out  2>>${repl_log_file})
 
 if [[ "${loglevel}" == "DEBUG" ]]; then
    printmessage "Beeline output :"
-   cat beeline.op >> ${repl_log_file}
+   cat repl_fulldump_beeline.out >> ${repl_log_file}
 fi
 
  # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' beeline.op)
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' beeline.op)
+dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_fulldump_beeline.out)
+dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' repl_fulldump_beeline.out)
 
  # Confirm database dump succeeded
 
@@ -91,11 +83,11 @@ if [[ ${dump_path} != ${repl_root}* ]]
   # If debug is enabled, the output would already be written earlier. So
   # skipping a write of output into log a second time.
   if [[ "${loglevel}" == "INFO" ]]; then
-     cat beeline.op >> ${repl_log_file}
+     cat repl_fulldump_beeline.out >> ${repl_log_file}
   fi
   return 0
 else
-  return ${dump_txid}
+  return 1
 fi
 }
 
@@ -107,15 +99,15 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  --hivevar last_repl_id=${last_repl_id} \
- -f ${INC_DUMP_HQL} >repl_dump_beeline.out  2>>${repl_log_file})
+ -f ${INC_DUMP_HQL} >repl_incdump_beeline.out  2>>${repl_log_file})
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_dump_beeline.out)
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' repl_dump_beeline.out)
+dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_incdump_beeline.out)
+dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' repl_incdump_beeline.out)
 
 if [[ "${loglevel}" == "DEBUG" ]]; then
    printmessage "REPL DUMP Beeline output :"
-   cat repl_dump_beeline.out >> ${repl_log_file}
+   cat repl_incdump_beeline.out >> ${repl_log_file}
 fi
 
 # Confirm database dump succeeded
@@ -126,11 +118,11 @@ if [[ ${dump_path} != ${repl_root}* ]]
   # If debug is enabled, the output would already be written earlier. So
   # skipping a write of output into log a second time.
   if [[ "${loglevel}" == "INFO" ]]; then
-     cat repl_dump_beeline.out  >> ${repl_log_file}
+     cat repl_incdump_beeline.out  >> ${repl_log_file}
   fi
   return 0
 else
-  return ${dump_txid}
+  return 1
 fi
 
 }
@@ -210,7 +202,7 @@ retrieve_current_target_repl_id
 
 if [[ ${last_repl_id} == "NULL" ]] ; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
-  read  -n 1 -p "Continue with full dump ? Y:N" fulldumpconfirmation
+  read  -n 1 -p "Continue with full dump ? Y:N \n" fulldumpconfirmation
 
   if [[ ${fulldumpconfirmation} == "Y" ]]; then
     printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
