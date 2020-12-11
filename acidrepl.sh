@@ -31,6 +31,7 @@ script_usage() {
 }
 
 last_repl_id=""
+post_load_repl_id=""
 dump_path=""
 dump_txid=""
 
@@ -56,6 +57,29 @@ return 1
 
 }
 
+
+retrieve_post_load_target_repl_id() {
+
+# ----------------------------------------------------------------------------
+# Retrieve current last_repl_id for database at target
+#
+post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
+ -n ${beeline_user} \
+ --hivevar dbname=${targetdbname} \
+ -f ${STATUS_HQL} >repl_status_beeline.out 2>>${repl_log_file} )
+
+ if [[ "${loglevel}" == "DEBUG" ]]; then
+   printmessage "REPL STATUS Beeline output : "
+   cat repl_status_beeline.out >> ${repl_log_file}
+ fi
+
+post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_status_beeline.out )
+
+[[ ${post_load_repl_id} =~ ${re} ]] && return 0
+return 1
+
+}
+
 gen_bootstrap_dump_source() {
 
 # ----------------------------------------------------------------------------
@@ -73,7 +97,7 @@ fi
 
  # Extract dump path and transaction id from the output
 dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_fulldump_beeline.out)
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' repl_fulldump_beeline.out)
+dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' repl_fulldump_beeline.out)
 
  # Confirm database dump succeeded
 
@@ -103,7 +127,7 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
 
 # Extract dump path and transaction id from the output
 dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_incdump_beeline.out)
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $3}' repl_incdump_beeline.out)
+dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' repl_incdump_beeline.out)
 
 if [[ "${loglevel}" == "DEBUG" ]]; then
    printmessage "REPL DUMP Beeline output :"
@@ -134,8 +158,7 @@ replay_dump_at_target(){
 
 # Add prefix for source cluster to dump directory when running at target cluster
 src_dump_path="${source_hdfs_prefix}${dump_path}"
-echo $src_dump_path
-repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
+local repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${targetdbname} \
  --hivevar src_dump_path=${src_dump_path} \
@@ -202,20 +225,29 @@ retrieve_current_target_repl_id
 
 if [[ ${last_repl_id} == "NULL" ]] ; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
-  read  -n 1 -p "Continue with full dump ? Y:N \n" fulldumpconfirmation
-
+  read  -n 1 -rep $'Continue with full dump ? Y:N \n' fulldumpconfirmation
+  echo ""
   if [[ ${fulldumpconfirmation} == "Y" ]]; then
     printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
     # dump generation command returns latest transaction id at source
     gen_bootstrap_dump_source
     source_latest_txid=${dump_txid}
+    printmessage "Source transaction id: |${source_latest_txid}|"
 
     if [[ ${source_latest_txid} > 0 ]]; then
-      printmessage "Database ${dbname} full dump has been generated at ${dump_path}."
+      printmessage "Database ${dbname} full dump has been generated at ${source_hdfs_prefix}${dump_path}."
       printmessage "The current transaction ID at source is ${source_latest_txid}"
       printmessage "There are ${source_latest_txid} transactions to be synced in this run."
       printmessage "Initiating data load at target cluster on database ${targetdbname}."
-      replay_dump_at_target || printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!"
+      replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
+      retrieve_post_load_target_repl_id
+      if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
+        printmessage "Database synchronized successfully. Last transaction id at target is ${post_load_repl_id}"
+      else
+        printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
+        printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
+      fi
+
     else
       printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
       exit 1
@@ -230,17 +262,24 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${dbname} transaction ID at target is currently ${last_repl_id}"
   gen_incremental_dump_source
   source_latest_txid=${dump_txid}
+  printmessage "Source transaction id: |${source_latest_txid}|"
 
   if [[ ${source_latest_txid} > 0 ]]; then
-    printmessage "Database ${dbname} incremental dump has been generated at ${dump_path}."
+    printmessage "Database ${dbname} incremental dump has been generated at ${source_hdfs_prefix}${dump_path}."
     printmessage "The current transaction ID at source is ${source_latest_txid}"
     txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
-    replay_dump_at_target || printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!"
+    replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
+    retrieve_post_load_target_repl_id
+    if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
+      printmessage "Database synchronized successfully. Last transaction id at target is ${post_load_repl_id}"
+    else
+      print "Post Load repl id: ${post_load_repl_id}"
+      print "Source repl id: ${source_latest_txid}"
+    fi
   else
-    printmessage "Invalid latest transaction id returned from Source : ${source_latest_txid}"
-    printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!."
-    exit 1
+    printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
+    printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
   fi
 
 else
