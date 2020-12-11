@@ -70,10 +70,10 @@ post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
 
  if [[ "${loglevel}" == "DEBUG" ]]; then
    printmessage "REPL STATUS Beeline output : "
-   cat repl_status_beeline.out >> ${repl_log_file}
+   cat post_load_repl_status_beeline.out >> ${repl_log_file}
  fi
 
-post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' repl_status_beeline.out )
+post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' post_load_repl_status_beeline.out )
 
 [[ ${post_load_repl_id} =~ ${re} ]] && return 0
 return 1
