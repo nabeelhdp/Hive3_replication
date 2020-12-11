@@ -8,7 +8,7 @@ Sample run
 
 First time - 
 FULL DUMP  (interactive prompt added for safety. Full dumps can add significant file count and load at source)
-
+```
 [hive@c4186-node3 ACID COPY]$ bash acidrepl.sh repltest_replica
 2020-12-11 06:00:02.471 ===================================================================
 2020-12-11 06:00:02.476 Initiating run to replicate repltest to repltest_replica
@@ -24,9 +24,9 @@ Y
 2020-12-11 06:00:28.475 There are 517 transactions to be synced in this run.
 2020-12-11 06:00:28.481 Initiating data load at target cluster on database repltest_replica.
 2020-12-11 06:00:39.150 Database synchronized successfully. Last transaction id at target is 517
-
+```
 INCREMENTAL DUMP (interactive prompt added for safety. Full dumps can add significant file count and load at source)
-
+```
 [hive@c4186-node3 ACID COPY]$ bash acidrepl.sh repltest_replica
 2020-12-11 06:00:44.944 ===================================================================
 2020-12-11 06:00:44.949 Initiating run to replicate repltest to repltest_replica
@@ -38,3 +38,4 @@ INCREMENTAL DUMP (interactive prompt added for safety. Full dumps can add signif
 2020-12-11 06:01:13.327 There are 5 transactions to be synced in this run.
 2020-12-11 06:01:23.106 Database synchronized successfully. Last transaction id at target is 522
 [hive@c4186-node3 ACID COPY]$ ll
+```
