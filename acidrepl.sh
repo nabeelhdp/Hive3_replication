@@ -186,6 +186,12 @@ if [[ $1 == "help" ]]; then
   exit 1
 fi
 
+# Parse the arguments
+if [ -z "$3" ]; then
+  script_usage
+	exit 1
+fi
+
 # Target DB Name can be overriden when passed as argument to script
 if [[ "$1" != "" ]]; then
    targetdbname=$1
