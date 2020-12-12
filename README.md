@@ -5,7 +5,10 @@ Generally used for Prod to DR sync.
 Utilizes the HIVE REPL features used under the hood in DLM.
 Try running the manual steps in the ManualSteps.md document before running the script.
 
-Sample run 
+#Recommended : 
+Use HDP 3.1.5 or CDP versions to use this script.
+
+#Sample run 
 
 First time - 
 FULL DUMP  (interactive prompt added for safety. Full dumps can add significant file count and load at source)
