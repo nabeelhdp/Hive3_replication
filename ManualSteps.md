@@ -27,7 +27,7 @@ For a manual test, we need to do the following:
 6) Next insert some data into source tables.
 7) Use command below in DR to get last_replication_id
 `repl status repltest`
-8) in prod beeline session generate dump from that point onwards
+8) In prod beeline session generate dump from that point onwards
 `repl dump repltest from <last_replication_id>`
 9) Run Step 4 again.
 
