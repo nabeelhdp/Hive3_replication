@@ -187,9 +187,8 @@ if [[ $1 == "help" ]]; then
 fi
 
 # Parse the arguments
-if [ -z "$3" ]; then
+if [ "$#" > 2 ]; then
   script_usage
-	exit 1
 fi
 
 # Target DB Name can be overriden when passed as argument to script
