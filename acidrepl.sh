@@ -225,7 +225,7 @@ retrieve_current_target_repl_id
 
 if [[ ${last_repl_id} == "NULL" ]] ; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
-  read  -n 1 -rep $'Continue with full dump ? Y:N \n' fulldumpconfirmation
+  read  -n 1 -t 30 -rep $'Continue with full dump ? Y:N \n' fulldumpconfirmation
   echo ""
   if [[ ${fulldumpconfirmation} == "Y" ]]; then
     printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
