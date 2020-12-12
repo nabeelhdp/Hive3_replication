@@ -34,8 +34,10 @@ For a manual test, we need to do the following:
 This will help us verify that manual sync of ACID tables is working between the clusters. The script will use the above procedure to perform actions 3 -9.
 
 There may be an error in step 3 in HDP versions upto 3.1.5.
+
 Issue:
 Step 3 fails with error: ReplicationChangeManager is not initialized
+
 Workaround:
 Create and drop a populated dummy table  in the database where we want to replicate the data.
 This is a one time activity for the database and doesn't need to be repeated.  
