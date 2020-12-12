@@ -16,7 +16,7 @@ The communication paths involved for Replication to work would involve one beeli
 For a manual test, we need to do the following:
 1) Create database in Production Hive using beeline
 `create database repltest;`
-# Create some tables in the database, and populate some dummy data.
+ Create some tables in the database, and populate some dummy data.
 2) Enable ChangeManager on Database. The '1' below can be any value. It's only to initiate the ChangeManager on the db.
 `alter database repltest properties SET DBPROPERTIES ('repl.source.for'='1')`
 3) Generate initial (bootstrap) replication dump for database
