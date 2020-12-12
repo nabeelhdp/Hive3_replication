@@ -18,7 +18,8 @@ source ./env.sh
 #
 source ./repl-common.sh
 
-trap trap_log INT
+trap trap_log_int INT
+trap trap_log_exit EXIT
 
 script_usage() {
 
