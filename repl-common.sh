@@ -7,6 +7,11 @@ printmessage() {
   echo -e ${message} | tee -a ${repl_log_file}
 }
 
-trap_log() {
+trap_log_int() {
   printmessage "Ctrl-C attempted. Aborting!"
+}
+
+trap_log_exit() {
+  sed -i '/^SLF4J:/d' ${repl_log_file}
+  sed -i '/^$/d' ${repl_log_file}
 }
