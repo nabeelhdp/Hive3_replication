@@ -1,5 +1,4 @@
-# Manual steps to verify end to end replication works on beeline shell before the script is executed.
-Recommended : Use HDP 3.1.5 or CDP versions to use this script.
+# Manual steps to verify end to end replication works on beeline shell.
 
 In Ambari UI -> Hive -> CONFIGS
 Advanced hive-site
