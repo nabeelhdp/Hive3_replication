@@ -102,8 +102,7 @@ dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' repl_fulldump_beeline.
 
  # Confirm database dump succeeded
 
-if [[ ${dump_path} != ${repl_root}* ]]
- then
+if [[ ${dump_path} != ${repl_root}* ]]; then
   printmessage "Could not generate database dump for ${dbname} at source.\n"
   # If debug is enabled, the output would already be written earlier. So
   # skipping a write of output into log a second time.
