@@ -1,8 +1,9 @@
 #!/bin/bash
 
 ###################################################################
-# Script Name : acid-repl.sh
-# Description : Replicate Hive databases with managed tables
+# Script Name : hive3-repl.sh
+# Description : Replicate Hive databases between two clusters. 
+#               Supports both managed and external tables.
 # Args        :
 # Author      : Nabeel Moidu
 # Email       : nmoidu@cloudera.com
