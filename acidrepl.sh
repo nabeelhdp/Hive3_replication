@@ -23,12 +23,10 @@ trap trap_log_exit EXIT
 
 script_usage() {
 
-  echo -e "Usage : ${BASENAME} [target-database-name] [debug] \n"
-  echo -e "**  This script is to be run on your target cluster. When run without \n"
-  echo -e "**  database name as argument, the target database name is considered \n"
-  echo -e "**  same as source defined in env.sh. \n"
-  echo -e "**  Any database name passed is validated against dblist variable in env.sh. \n"
-  echo -e "**  DEBUG is optional. When set, DEBUG provides all beeline outputs in log.\n"
+  echo -e "Usage : ${BASENAME} <database-name> [DEBUG] \n"
+  echo -e "**  It is recommended to run this script at the target cluster, but it should work in either cluster.\n" 
+  echo -e "**  The database name is a required argument and is validated against the dblist variable in env.sh. \n"
+  echo -e "**  Use the string DEBUG as the last argument for verbose output.\n"
 }
 
 last_repl_id=""
@@ -43,7 +41,7 @@ retrieve_current_target_repl_id() {
 #
 repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
- --hivevar dbname=${targetdbname} \
+ --hivevar dbname=${dbname} \
  -f ${STATUS_HQL} >repl_status_beeline.out 2>>${repl_log_file} )
 
  if [[ "${loglevel}" == "DEBUG" ]]; then
@@ -66,8 +64,8 @@ retrieve_post_load_target_repl_id() {
 #
 post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
- --hivevar dbname=${targetdbname} \
- -f ${STATUS_HQL} >repl_status_beeline.out 2>>${repl_log_file} )
+ --hivevar dbname=${dbname} \
+ -f ${STATUS_HQL} >post_load_repl_status_beeline.out 2>>${repl_log_file} )
 
  if [[ "${loglevel}" == "DEBUG" ]]; then
    printmessage "REPL STATUS Beeline output : "
@@ -160,7 +158,7 @@ replay_dump_at_target(){
 src_dump_path="${source_hdfs_prefix}${dump_path}"
 local repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
- --hivevar dbname=${targetdbname} \
+ --hivevar dbname=${dbname} \
  --hivevar src_dump_path=${src_dump_path} \
  -f ${LOAD_HQL} >repl_load_beeline.out 2>>${repl_log_file})
 
@@ -178,44 +176,44 @@ grep "INFO  : OK" repl_load_beeline.out  && return 0
 return 1
 }
 
-################ FLOW BEGINS HERE #########################
-
-if [[ $1 == "help" ]]; then
-  script_usage
-  exit 1
-fi
+################ MAIN BEGINS HERE #########################
 
 # Parse the arguments
-if [ "$#" > 2 ]; then
+[[ "$#" > 2 ]] || [[ "$#" < 1 ]]; then
   script_usage
 fi
 
 # Target DB Name can be overriden when passed as argument to script
-if [[ "$1" != "" ]]; then
-   targetdbname=$1
+if [[ "$1" == "debug" ]]; then
+   dbname=$1
 fi
 
 # Validate dbname provided against list of valid names specified in env.sh
 dbvalidity="0"
 for val in $dblist; do
-    if [[ $val == ${targetdbname} ]]; then
+    if [[ $val == ${dbname} ]]; then
       dbvalidity="1"
     fi
 done
 
 if [[ ${dbvalidity} == "0" ]]; then
   printmessage "Invalid target database name specified. Falling back to source name."
-  targetdbname=${dbname}
+  dbname=${dbname}
 fi
 
 # Set debug if passed as first or second argument to script
 loglevel="INFO"
 shopt -s nocasematch;
-[[ "$2" == "DEBUG" ]] || [[ "$1" == "debug" ]] && loglevel="DEBUG" && printmessage "Enabling DEBUG output"
+if [[ "$2" == "DEBUG" ]] || [[ "$1" == "debug" ]] 
+then
+  loglevel="DEBUG" 
+  printmessage "Enabling DEBUG output"
+else 
+  
 shopt -u nocasematch;
 
 printmessage "==================================================================="
-printmessage "Initiating run to replicate ${dbname} to ${targetdbname} "
+printmessage "Initiating run to replicate ${dbname} to ${dbname} "
 printmessage "==================================================================="
 
 # Regex to detect if transaction ID is number
@@ -230,6 +228,8 @@ retrieve_current_target_repl_id
 
 if [[ ${last_repl_id} == "NULL" ]] ; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
+  # Remove the comment from the line below and comment out the line after to let the script run non-interactively
+  # fulldumpconfirmation="Y" 
   read  -n 1 -t 30 -rep $'Continue with full dump ? Y:N \n' fulldumpconfirmation
   echo ""
   if [[ ${fulldumpconfirmation} == "Y" ]]; then
@@ -240,14 +240,14 @@ if [[ ${last_repl_id} == "NULL" ]] ; then
     printmessage "Source transaction id: |${source_latest_txid}|"
 
     if [[ ${source_latest_txid} > 0 ]]; then
-      printmessage "Database ${dbname} full dump has been generated at ${source_hdfs_prefix}${dump_path}."
-      printmessage "The current transaction ID at source is ${source_latest_txid}"
+      printmessage "Database ${dbname} full dump has been generated at |${source_hdfs_prefix}${dump_path}|."
+      printmessage "The current transaction ID at source is |${source_latest_txid}|"
       printmessage "There are ${source_latest_txid} transactions to be synced in this run."
-      printmessage "Initiating data load at target cluster on database ${targetdbname}."
+      printmessage "Initiating data load at target cluster on database ${dbname}."
       replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
       retrieve_post_load_target_repl_id
       if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
-        printmessage "Database synchronized successfully. Last transaction id at target is ${post_load_repl_id}"
+        printmessage "Database synchronized successfully. Last transaction id at target is |${post_load_repl_id}|"
       else
         printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
         printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
@@ -279,9 +279,8 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
       printmessage "Database replication completed SUCCESSFULLY. Latest transaction id at target is ${post_load_repl_id}"
     else
-      printmessage "Database replication FAILED"
-      printmessage "Post Load repl id: ${post_load_repl_id}"
-      printmessage "Source repl id: ${source_latest_txid}"
+      printmessage "Database replication FAILED ! Post Load repl id: ${post_load_repl_id}"
+      printmessage "Source repl id: ${source_latest_txid}" && exit 1
     fi
   else
     printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
