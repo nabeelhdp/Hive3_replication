@@ -22,6 +22,7 @@ BOOTSTRAP_HQL="${HQL_DIR}/replbootstrap.hql"
 EXT_INC_DUMP_HQL="${HQL_DIR}/replextdump.hql"
 EXT_BOOTSTRAP_HQL="${HQL_DIR}/replextbootstrap.hql"
 LOAD_HQL="${HQL_DIR}/replload.hql"
+EXT_LOAD_HQL="${HQL_DIR}/replextload.hql"
 STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
 TMP_DIR="./tmp"
