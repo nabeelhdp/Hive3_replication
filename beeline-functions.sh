@@ -136,6 +136,7 @@ replay_dump_at_target(){
 # Add prefix for source cluster to dump directory when running at target cluster
 src_dump_path="${source_hdfs_prefix}${dump_path}"
 out_file='${TMP_DIR}/repl_load_beeline.out'
+LOAD_HQL=$2
 
 local repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
