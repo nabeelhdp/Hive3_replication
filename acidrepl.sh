@@ -277,10 +277,11 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
     retrieve_post_load_target_repl_id
     if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
-      printmessage "Database synchronized successfully. Last transaction id at target is ${post_load_repl_id}"
+      printmessage "Database replication completed SUCCESSFULLY. Latest transaction id at target is ${post_load_repl_id}"
     else
-      print "Post Load repl id: ${post_load_repl_id}"
-      print "Source repl id: ${source_latest_txid}"
+      printmessage "Database replication FAILED"
+      printmessage "Post Load repl id: ${post_load_repl_id}"
+      printmessage "Source repl id: ${source_latest_txid}"
     fi
   else
     printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
