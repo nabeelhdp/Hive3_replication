@@ -55,7 +55,7 @@ gen_bootstrap_dump_source() {
 # ----------------------------------------------------------------------------
 # dump entire database at source hive instance for first time
 #
-HQL_FILE=$2
+HQL_FILE=$1
 out_file='${TMP_DIR}/repl_fulldump_beeline.out'
 repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
@@ -92,7 +92,7 @@ gen_incremental_dump_source() {
 # ----------------------------------------------------------------------------
 # dump database at source hive instance from the last_repl_id at target
 #
-HQL_FILE=$2
+HQL_FILE=$1
 out_file='${TMP_DIR}/repl_incdump_beeline.out'
 repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
@@ -136,7 +136,7 @@ replay_dump_at_target(){
 # Add prefix for source cluster to dump directory when running at target cluster
 src_dump_path="${source_hdfs_prefix}${dump_path}"
 out_file='${TMP_DIR}/repl_load_beeline.out'
-LOAD_HQL=$2
+LOAD_HQL=$1
 
 local repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
