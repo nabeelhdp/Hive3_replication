@@ -178,7 +178,7 @@ return 1
 ################ MAIN BEGINS HERE #########################
 
 # Argument count should be either 1 or 2
-[[ "$#" > 2 ]] || [[ "$#" < 1 ]]; then
+if [[ "$#" > 2 ]] || [[ "$#" < 1 ]]; then
   script_usage
 fi
 
