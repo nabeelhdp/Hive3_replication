@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 retrieve_current_target_repl_id() {
 
@@ -55,11 +55,12 @@ gen_bootstrap_dump_source() {
 # ----------------------------------------------------------------------------
 # dump entire database at source hive instance for first time
 #
+HQL_FILE=$2
 out_file='${TMP_DIR}/repl_fulldump_beeline.out'
 repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
- -f ${BOOTSTRAP_HQL} \
+ -f ${HQL_FILE} \
  > ${out_file} \
  2>>${repl_log_file})
 
@@ -91,12 +92,13 @@ gen_incremental_dump_source() {
 # ----------------------------------------------------------------------------
 # dump database at source hive instance from the last_repl_id at target
 #
+HQL_FILE=$2
 out_file='${TMP_DIR}/repl_incdump_beeline.out'
 repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  --hivevar last_repl_id=${last_repl_id} \
- -f ${INC_DUMP_HQL} \
+ -f ${HQL_FILE} \
  > ${out_file} \
  2>>${repl_log_file})
 
