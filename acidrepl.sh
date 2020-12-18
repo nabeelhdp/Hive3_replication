@@ -1,4 +1,4 @@
-  #!/bin/bash
+#!/bin/bash
 
 ###################################################################
 # Script Name : acid-repl.sh
@@ -17,179 +17,11 @@ source ./env.sh
 # Source common functions
 #
 source ./repl-common.sh
+source ./beeline-functions.sh
 
 trap trap_log_int INT
 trap trap_log_exit EXIT
 
-script_usage() {
-
-  echo -e "Usage : ${BASENAME} <database-name> [DEBUG] \n"
-  echo -e "**  It is recommended to run this script at the target cluster, but it should work in either cluster.\n" 
-  echo -e "**  The database name is a required argument and is validated against the dblist variable in env.sh. \n"
-  echo -e "**  Use the string DEBUG as the last argument for verbose output.\n"
-}
-
-last_repl_id=""
-post_load_repl_id=""
-dump_path=""
-dump_txid=""
-
-retrieve_current_target_repl_id() {
-
-# ----------------------------------------------------------------------------
-# Retrieve current last_repl_id for database at target
-#
-out_file='${TMP_DIR}/repl_status_beeline.out'
-repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
- -n ${beeline_user} \
- --hivevar dbname=${dbname} \
- -f ${STATUS_HQL} \
- >${out_file} \
- 2>>${repl_log_file} )
-
- if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL STATUS Beeline output : "
-   cat ${out_file} >> ${repl_log_file}
- fi
-
-last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
-
-[[ ${last_repl_id} =~ ${re} ]] && return 0
-return 1
-
-}
-
-retrieve_post_load_target_repl_id() {
-
-# ----------------------------------------------------------------------------
-# Retrieve current last_repl_id for database at target
-#
-out_file='${TMP_DIR}/post_load_repl_status_beeline.out'
-post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
- -n ${beeline_user} \
- --hivevar dbname=${dbname} \
- -f ${STATUS_HQL} \
- > ${out_file} \
- 2>>${repl_log_file} )
-
- if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL STATUS Beeline output : "
-   cat ${out_file} >> ${repl_log_file}
- fi
-
-post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
-
-[[ ${post_load_repl_id} =~ ${re} ]] && return 0
-return 1
-
-}
-
-gen_bootstrap_dump_source() {
-
-# ----------------------------------------------------------------------------
-# dump entire database at source hive instance for first time
-#
-out_file='${TMP_DIR}/repl_fulldump_beeline.out'
-repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
- -n ${beeline_user} \
- --hivevar dbname=${dbname} \
- -f ${BOOTSTRAP_HQL} \
- > ${out_file} \
- 2>>${repl_log_file})
-
-if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "Beeline output :"
-   cat ${out_file} >> ${repl_log_file}
-fi
-
- # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
-
- # Confirm database dump succeeded
-
-if [[ ${dump_path} != ${repl_root}* ]]; then
-  printmessage "Could not generate database dump for ${dbname} at source.\n"
-  # If debug is enabled, the output would already be written earlier. So
-  # skipping a write of output into log a second time.
-  if [[ "${loglevel}" == "INFO" ]]; then
-    cat ${out_file} >> ${repl_log_file}
-  fi
-  return 0
-else
-  return 1
-fi
-}
-
-gen_incremental_dump_source() {
-# ----------------------------------------------------------------------------
-# dump database at source hive instance from the last_repl_id at target
-#
-out_file='${TMP_DIR}/repl_incdump_beeline.out'
-repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
- -n ${beeline_user} \
- --hivevar dbname=${dbname} \
- --hivevar last_repl_id=${last_repl_id} \
- -f ${INC_DUMP_HQL} \
- > ${out_file} \
- 2>>${repl_log_file})
-
-# Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
-
-if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL DUMP Beeline output :"
-   cat ${out_file} >> ${repl_log_file}
-fi
-
-# Confirm database dump succeeded
-
-if [[ ${dump_path} != ${repl_root}* ]]
- then
-  printmessage "Could not generate database dump for ${dbname} at source.\n"
-  # If debug is enabled, the output would already be written earlier. So
-  # skipping a write of output into log a second time.
-  if [[ "${loglevel}" == "INFO" ]]; then
-    cat ${out_file} >> ${repl_log_file}
-  fi
-  return 0
-else
-  return 1
-fi
-
-}
-
-replay_dump_at_target(){
-# ----------------------------------------------------------------------------
-# Load database at target from hdfs location in source
-#
-
-# Add prefix for source cluster to dump directory when running at target cluster
-src_dump_path="${source_hdfs_prefix}${dump_path}"
-out_file='${TMP_DIR}/repl_load_beeline.out'
-
-local repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
- -n ${beeline_user} \
- --hivevar dbname=${dbname} \
- --hivevar src_dump_path=${src_dump_path} \
- -f ${LOAD_HQL} \
-  >${out_file} \
-  2>>${repl_log_file})
-
-if [[ "${loglevel}" == "$DEBUG" ]]; then
-  printmessage "REPL LOAD Beeline output :"
-  cat ${out_file} >> ${repl_log_file}
-fi
-
-# Confirm database load succeeded
-#
-# return 0 returns to where the function was called.  $? contains 0 (success).
-# return 1 returns to where the function was called.  $? contains 1 (failure).
-
-grep "INFO  : OK" ${out_file}  && return 0
-return 1
-}
 
 ################ MAIN BEGINS HERE #########################
 
@@ -233,6 +65,10 @@ re='^[0-9]+$'
 # For one run of this script, we expect only one dump path.
 # Hence declaring it as global var to return from functions.
 dump_path=""
+dump_txid=""
+
+last_repl_id=""
+post_load_repl_id=""
 
 # Retrieve the current state of replication in the target cluster.
 retrieve_current_target_repl_id
@@ -240,8 +76,16 @@ retrieve_current_target_repl_id
 if [[ ${last_repl_id} == "NULL" ]]; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
   printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
+  
   # dump generation command returns latest transaction id at source
-  gen_bootstrap_dump_source
+  if [[ ${include_external_tables} == 'true' ]]; then
+    printmessage "Including external tables in full dump"
+    gen_bootstrap_dump_source ${EXT_BOOTSTRAP_HQL}
+  else 
+    printmessage "Skipping external tables in full dump"
+    gen_bootstrap_dump_source ${BOOTSTRAP_HQL}
+  fi 
+  
   source_latest_txid=${dump_txid}
   printmessage "Source transaction id: |${source_latest_txid}|"
 
@@ -265,7 +109,17 @@ if [[ ${last_repl_id} == "NULL" ]]; then
 
 elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${dbname} transaction ID at target is currently |${last_repl_id}|"
-  gen_incremental_dump_source
+
+  
+  # dump generation command returns latest transaction id at source
+  if [[ ${include_external_tables} == 'true' ]]; then
+    printmessage "Including external tables in incremental dump"
+    gen_incremental_dump_source ${EXT_INC_DUMP_HQL}
+  else 
+    printmessage "Skipping external tables in incremental dump"
+    gen_incremental_dump_source ${INC_DUMP_HQL}
+  fi 
+  
   source_latest_txid=${dump_txid}
   printmessage "The current transaction ID at source is |${source_latest_txid}|"
 
@@ -293,4 +147,3 @@ else
   echo -e "See ${repl_log_file} for details. Exiting!"
   exit 1
 fi
-
