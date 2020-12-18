@@ -189,8 +189,9 @@ loglevel="INFO"
 
 # If second argument exists, it should be DEBUG, else ignore
 if [[ "$2" == "DEBUG" ]]; then
-  loglevel="DEBUG" 
   printmessage "Enabling DEBUG output"
+  loglevel="DEBUG" 
+  beeline_opts="--verbose=true --showHeader=true --silent=false"
 fi
 
 # Validate dbname provided against list of valid names specified in env.sh
@@ -220,44 +221,34 @@ dump_path=""
 # Retrieve the current state of replication in the target cluster.
 retrieve_current_target_repl_id
 
-if [[ ${last_repl_id} == "NULL" ]] ; then
+if [[ ${last_repl_id} == "NULL" ]]; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
-  # Remove the comment from the line below and comment out the line after to let the script run non-interactively
-  fulldumpconfirmation="Y" 
-  # read  -n 1 -t 30 -rep $'Continue with full dump ? Y:N \n' fulldumpconfirmation
-  if [[ ${fulldumpconfirmation} == "Y" ]]; then
-    printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
-    # dump generation command returns latest transaction id at source
-    gen_bootstrap_dump_source
-    source_latest_txid=${dump_txid}
-    printmessage "Source transaction id: |${source_latest_txid}|"
+  printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
+  # dump generation command returns latest transaction id at source
+  gen_bootstrap_dump_source
+  source_latest_txid=${dump_txid}
+  printmessage "Source transaction id: |${source_latest_txid}|"
 
-    if [[ ${source_latest_txid} > 0 ]]; then
-      printmessage "Database ${dbname} full dump has been generated at |${source_hdfs_prefix}${dump_path}|."
-      printmessage "The current transaction ID at source is |${source_latest_txid}|"
-      printmessage "There are ${source_latest_txid} transactions to be synced in this run."
-      printmessage "Initiating data load at target cluster on database ${dbname}."
-      replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
-      retrieve_post_load_target_repl_id
-      if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
-        printmessage "Database synchronized successfully. Last transaction id at target is |${post_load_repl_id}|"
-      else
-        printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
-        printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
-      fi
-
+  if [[ ${source_latest_txid} > 0 ]]; then
+    printmessage "Database ${dbname} full dump has been generated at |${source_hdfs_prefix}${dump_path}|."
+    printmessage "The current transaction ID at source is |${source_latest_txid}|"
+    printmessage "There are ${source_latest_txid} transactions to be synced in this run."
+    printmessage "Initiating data load at target cluster on database ${dbname}."
+    replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
+    retrieve_post_load_target_repl_id
+    if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
+      printmessage "Database synchronized successfully. Last transaction id at target is |${post_load_repl_id}|"
     else
-      printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
-      exit 1
+      printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
+      printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
     fi
-
   else
-    echo "Aborting replication attempt. Exiting!"
+    printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
     exit 1
   fi
 
 elif [[ ${last_repl_id} =~ ${re} ]] ; then
-  printmessage "Database ${dbname} transaction ID at target is currently ${last_repl_id}"
+  printmessage "Database ${dbname} transaction ID at target is currently |${last_repl_id}|"
   gen_incremental_dump_source
   source_latest_txid=${dump_txid}
   printmessage "Source transaction id: |${source_latest_txid}|"
