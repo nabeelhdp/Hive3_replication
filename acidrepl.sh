@@ -184,6 +184,8 @@ fi
 
 # If argument count is 1 or 2, the first argument is the db name 
 dbname=$1
+# By default, loglevel is INFO
+loglevel="INFO"
 
 # If second argument exists, it should be DEBUG, else ignore
 if [[ "$2" == "DEBUG" ]]; then
@@ -193,8 +195,8 @@ fi
 
 # Validate dbname provided against list of valid names specified in env.sh
 dbvalidity="0"
-for val in $dblist; do
-    if [[ $val == ${dbname} ]]; then
+for val in ${dblist}; do
+    if [[ ${val} == ${dbname} ]]; then
       dbvalidity="1"
     fi
 done
@@ -203,17 +205,6 @@ if [[ ${dbvalidity} == "0" ]]; then
   printmessage "Invalid target database name specified. Falling back to source name."
   dbname=${dbname}
 fi
-
-# Set debug if passed as first or second argument to script
-loglevel="INFO"
-shopt -s nocasematch;
-if [[ "$2" == "DEBUG" ]] || [[ "$1" == "debug" ]] 
-then
-  loglevel="DEBUG" 
-  printmessage "Enabling DEBUG output"
-else 
-  
-shopt -u nocasematch;
 
 printmessage "==================================================================="
 printmessage "Initiating run to replicate ${dbname} to ${dbname} "
@@ -272,21 +263,23 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Source transaction id: |${source_latest_txid}|"
 
   if [[ ${source_latest_txid} > 0 ]]; then
-    printmessage "Database ${dbname} incremental dump has been generated at ${source_hdfs_prefix}${dump_path}."
-    printmessage "The current transaction ID at source is ${source_latest_txid}"
+    printmessage "Database ${dbname} incremental dump has been generated at |${source_hdfs_prefix}${dump_path}|."
+    printmessage "The current transaction ID at source is |${source_latest_txid}|"
     txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
     replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
     retrieve_post_load_target_repl_id
     if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
-      printmessage "Database replication completed SUCCESSFULLY. Latest transaction id at target is ${post_load_repl_id}"
+      printmessage "Database replication completed SUCCESSFULLY. Latest transaction id at target is |${post_load_repl_id}|"
     else
-      printmessage "Database replication FAILED ! Post Load repl id: ${post_load_repl_id}"
-      printmessage "Source repl id: ${source_latest_txid}" && exit 1
+      printmessage "Database replication FAILED ! Post Load repl id: |${post_load_repl_id}|"
+      printmessage "Source repl id: |${source_latest_txid}|"
+      exit 1
     fi
   else
     printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
-    printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
+    printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!."
+    exit 1
   fi
 
 else
