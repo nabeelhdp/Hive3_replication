@@ -7,6 +7,7 @@ source_jdbc_url="jdbc:hive2://c2186-node2.coelab.cloudera.com:2181,c2186-node3.c
 # List of acceptable dbnames when passed via argument to script. This is for a sanity check to avoid accidental full dump generation in prod for mistyped target database names.
 dblist="repltest repltest_replica"
 
+include_external_tables=false
 repl_root="/apps/hive/repl"
 #source_hdfs_prefix="hdfs://c2186"
 source_hdfs_prefix="hdfs://c2186-node2.coelab.cloudera.com:8020"
