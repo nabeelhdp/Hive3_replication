@@ -98,18 +98,19 @@ if [[ ${last_repl_id} == "NULL" ]]; then
     if replay_dump_at_target; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
+      if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
+        printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
+      else
+        printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
+        printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
+      fi
     else 
       printmessage "Data load at target cluster failed" 
       echo -e "See ${repl_log_file} for details. Exiting!" 
       exit 1
     fi 
     
-    if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
-      printmessage "Database synchronized successfully. Last transaction id at target is |${post_load_repl_id}|"
-    else
-      printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
-      printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
-    fi
+  
   else
     printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
     exit 1
@@ -135,17 +136,24 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     printmessage "Database ${dbname} incremental dump has been generated at |${source_hdfs_prefix}${dump_path}|."
     txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
-    replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
-    retrieve_post_load_target_repl_id
-    if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
-      printmessage "Database replication completed SUCCESSFULLY. Latest transaction id at target is |${post_load_repl_id}|"
-    else
-      printmessage "Database replication FAILED ! Post Load repl id: |${post_load_repl_id}|"
-      printmessage "Source repl id: |${source_latest_txid}|"
+
+    if replay_dump_at_target; then 
+      printmessage "Data load at target cluster completed. Verifying...." 
+      retrieve_post_load_target_repl_id
+      if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
+        printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
+      else
+        printmessage "Unable to verify database replication! Post Load repl id: |${post_load_repl_id}|"
+        printmessage "Source repl id: |${source_latest_txid}|"    exit 1
+      fi
+    else 
+      printmessage "Data load at target cluster failed" 
+      echo -e "See ${repl_log_file} for details. Exiting!" 
       exit 1
-    fi
+    fi 
+        
   else
-    printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
+    printmessage "Invalid transaction id returned from Source : |${source_latest_txid}|"
     printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!."
     exit 1
   fi
