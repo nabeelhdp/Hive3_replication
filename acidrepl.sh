@@ -251,11 +251,10 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${dbname} transaction ID at target is currently |${last_repl_id}|"
   gen_incremental_dump_source
   source_latest_txid=${dump_txid}
-  printmessage "Source transaction id: |${source_latest_txid}|"
+  printmessage "The current transaction ID at source is |${source_latest_txid}|"
 
   if [[ ${source_latest_txid} > 0 ]]; then
     printmessage "Database ${dbname} incremental dump has been generated at |${source_hdfs_prefix}${dump_path}|."
-    printmessage "The current transaction ID at source is |${source_latest_txid}|"
     txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
     replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
