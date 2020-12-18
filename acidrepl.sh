@@ -56,7 +56,6 @@ return 1
 
 }
 
-
 retrieve_post_load_target_repl_id() {
 
 # ----------------------------------------------------------------------------
@@ -178,14 +177,18 @@ return 1
 
 ################ MAIN BEGINS HERE #########################
 
-# Parse the arguments
+# Argument count should be either 1 or 2
 [[ "$#" > 2 ]] || [[ "$#" < 1 ]]; then
   script_usage
 fi
 
-# Target DB Name can be overriden when passed as argument to script
-if [[ "$1" == "debug" ]]; then
-   dbname=$1
+# If argument count is 1 or 2, the first argument is the db name 
+dbname=$1
+
+# If second argument exists, it should be DEBUG, else ignore
+if [[ "$2" == "DEBUG" ]]; then
+  loglevel="DEBUG" 
+  printmessage "Enabling DEBUG output"
 fi
 
 # Validate dbname provided against list of valid names specified in env.sh
@@ -229,9 +232,8 @@ retrieve_current_target_repl_id
 if [[ ${last_repl_id} == "NULL" ]] ; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
   # Remove the comment from the line below and comment out the line after to let the script run non-interactively
-  # fulldumpconfirmation="Y" 
-  read  -n 1 -t 30 -rep $'Continue with full dump ? Y:N \n' fulldumpconfirmation
-  echo ""
+  fulldumpconfirmation="Y" 
+  # read  -n 1 -t 30 -rep $'Continue with full dump ? Y:N \n' fulldumpconfirmation
   if [[ ${fulldumpconfirmation} == "Y" ]]; then
     printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
     # dump generation command returns latest transaction id at source
