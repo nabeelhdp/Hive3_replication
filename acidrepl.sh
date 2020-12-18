@@ -94,8 +94,16 @@ if [[ ${last_repl_id} == "NULL" ]]; then
     printmessage "The current transaction ID at source is |${source_latest_txid}|"
     printmessage "There are ${source_latest_txid} transactions to be synced in this run."
     printmessage "Initiating data load at target cluster on database ${dbname}."
-    replay_dump_at_target && printmessage "Data load at target cluster failed" && echo -e "See ${repl_log_file} for details. Exiting!" && exit 1
-    retrieve_post_load_target_repl_id
+
+    if replay_dump_at_target; then 
+      printmessage "Data load at target cluster completed. Verifying...." 
+      retrieve_post_load_target_repl_id
+    else 
+      printmessage "Data load at target cluster failed" 
+      echo -e "See ${repl_log_file} for details. Exiting!" 
+      exit 1
+    fi 
+    
     if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
       printmessage "Database synchronized successfully. Last transaction id at target is |${post_load_repl_id}|"
     else
