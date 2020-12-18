@@ -56,6 +56,8 @@ if [[ ${dbvalidity} == "0" ]]; then
   dbname=${dbname}
 fi
 
+[ -d ${TMP_DIR} ] || mkdir ${TMP_DIR} 
+
 printmessage "==================================================================="
 printmessage "Initiating run to replicate ${dbname} to ${dbname} "
 printmessage "==================================================================="
