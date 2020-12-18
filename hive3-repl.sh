@@ -96,7 +96,15 @@ if [[ ${last_repl_id} == "NULL" ]]; then
     printmessage "There are ${source_latest_txid} transactions to be synced in this run."
     printmessage "Initiating data load at target cluster on database ${dbname}."
 
-    if replay_dump_at_target; then 
+    if [[ ${include_external_tables} == 'true' ]]; then
+      printmessage "External tables included. This may trigger distcp jobs in background."
+      HQL_FILE=${EXT_INC_DUMP_HQL}
+    else 
+      printmessage "External tables not included."
+      HQL_FILE=${INC_DUMP_HQL}
+    fi 
+    
+    if replay_dump_at_target ${HQL_FILE}; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
       if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
@@ -137,8 +145,16 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     printmessage "Database ${dbname} incremental dump has been generated at |${source_hdfs_prefix}${dump_path}|."
     txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
-
-    if replay_dump_at_target; then 
+    
+    if [[ ${include_external_tables} == 'true' ]]; then
+      printmessage "External tables included. This may trigger distcp jobs in background."
+      HQL_FILE=${EXT_INC_DUMP_HQL}
+    else 
+      printmessage "External tables not included."
+      HQL_FILE=${INC_DUMP_HQL}
+    fi 
+        
+    if replay_dump_at_target ${HQL_FILE}; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
       if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
