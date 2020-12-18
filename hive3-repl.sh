@@ -98,10 +98,10 @@ if [[ ${last_repl_id} == "NULL" ]]; then
 
     if [[ ${include_external_tables} == 'true' ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
-      HQL_FILE=${EXT_INC_DUMP_HQL}
+      HQL_FILE=${EXT_LOAD_HQL}
     else 
       printmessage "External tables not included."
-      HQL_FILE=${INC_DUMP_HQL}
+      HQL_FILE=${LOAD_HQL}
     fi 
     
     if replay_dump_at_target ${HQL_FILE}; then 
@@ -148,10 +148,10 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     
     if [[ ${include_external_tables} == 'true' ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
-      HQL_FILE=${EXT_INC_DUMP_HQL}
+      HQL_FILE=${EXT_LOAD_HQL}
     else 
       printmessage "External tables not included."
-      HQL_FILE=${INC_DUMP_HQL}
+      HQL_FILE=${LOAD_HQL}
     fi 
         
     if replay_dump_at_target ${HQL_FILE}; then 
