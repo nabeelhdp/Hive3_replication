@@ -13,7 +13,7 @@ repl_root="/apps/hive/repl"
 source_hdfs_prefix="hdfs://c2186-node2.coelab.cloudera.com:8020"
 beeline_opts="--verbose=false --showHeader=false --silent=true"
 beeline_user="hive"
-repl_log_file="./replication_$(date +"%Y_%m_%d_%I_%M_%p")_log"
+repl_log_file="./replication_$(date +"%Y_%m_%d_%I_%M_%p").log"
 
 # Locations for the various Hive QL scripts for each action.
 HQL_DIR="./HQL"
@@ -25,4 +25,4 @@ LOAD_HQL="${HQL_DIR}/replload.hql"
 EXT_LOAD_HQL="${HQL_DIR}/replextload.hql"
 STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
-TMP_DIR="./tmp"
+TMP_DIR="./tmp/_$(date +"%Y_%m_%d_%I_%M_%p")"
