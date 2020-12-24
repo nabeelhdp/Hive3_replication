@@ -58,9 +58,9 @@ fi
 
 [ -d ${TMP_DIR} ] || mkdir ${TMP_DIR} 
 
-printmessage "==================================================================="
+echo "===================================================================" >>${repl_log_file}
 printmessage "Initiating run to replicate ${dbname} to ${dbname} "
-printmessage "==================================================================="
+echo "==================================================================="  >>${repl_log_file}
 
 # Regex to detect if transaction ID is number
 re='^[0-9]+$'
