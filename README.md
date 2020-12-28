@@ -38,30 +38,47 @@ Use HDP 3.1.5 or CDP versions to use this script.
 First time - 
 FULL DUMP  (interactive prompt added for safety. Full dumps can add significant file count and load at source)
 ```
-[hive@c4186-node3 ACID COPY]$ bash acidrepl.sh repltest_replica
-2020-12-11 06:00:02.471 ===================================================================
-2020-12-11 06:00:02.476 Initiating run to replicate repltest to repltest_replica
-2020-12-11 06:00:02.480 ===================================================================
-2020-12-11 06:00:07.393 No replication id detected at target. Full data dump dump needs to be initiated.
-2020-12-11 06:00:12.781 Database repltest is being synced for the first time. Initiating full dump.
-2020-12-11 06:00:28.454 Source transaction id: |517|
-2020-12-11 06:00:28.461 Database repltest full dump has been generated at hdfs://c2186-node2.coelab.cloudera.com:8020/apps/hive/repl/62f21edc-6fee-4eb1-a7ce-26fee07f3516.
-2020-12-11 06:00:28.468 The current transaction ID at source is 517
-2020-12-11 06:00:28.475 There are 517 transactions to be synced in this run.
-2020-12-11 06:00:28.481 Initiating data load at target cluster on database repltest_replica.
-2020-12-11 06:00:39.150 Database synchronized successfully. Last transaction id at target is 517
+[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest DEBUG
+2020-12-28 08:28:00.672 Enabling DEBUG output
+2020-12-28 08:28:00.678 Initiating run to replicate repltest to repltest
+2020-12-28 08:28:05.852 No replication id detected at target. Full data dump dump needs to be initiated.
+2020-12-28 08:28:05.857 Database repltest is being synced for the first time. Initiating full dump.
+2020-12-28 08:28:05.861 Skipping external tables in full dump
+2020-12-28 08:28:11.831 Source transaction id: |1029|
+2020-12-28 08:28:11.837 Database repltest full dump has been generated at |hdfs://c2186-node2.coelab.cloudera.com:8020/apps/hive/repl/5d117227-38c4-4b1c-826b-e3222b9dfbc3|.
+2020-12-28 08:28:11.843 The current transaction ID at source is |1029|
+2020-12-28 08:28:11.847 There are 1029 transactions to be synced in this run.
+2020-12-28 08:28:11.851 Initiating data load at target cluster on database repltest.
+2020-12-28 08:28:11.856 External tables not included.
+2020-12-28 08:28:31.926 Data load at target cluster completed. Verifying....
+2020-12-28 08:28:37.368 Database replication completed SUCCESSFULLY. Last transaction id at target is |1029|
 ```
 INCREMENTAL DUMP (interactive prompt added for safety. Full dumps can add significant file count and load at source)
 ```
-[hive@c4186-node3 ACID COPY]$ bash acidrepl.sh repltest_replica
-2020-12-11 06:00:44.944 ===================================================================
-2020-12-11 06:00:44.949 Initiating run to replicate repltest to repltest_replica
-2020-12-11 06:00:44.955 ===================================================================
-2020-12-11 06:00:50.80 Database repltest transaction ID at target is currently 517
-2020-12-11 06:01:13.315 Source transaction id: |522|
-2020-12-11 06:01:13.319 Database repltest incremental dump has been generated at hdfs://c2186-node2.coelab.cloudera.com:8020/apps/hive/repl/08406a86-013c-4a77-97dc-06ffd1b79fca.
-2020-12-11 06:01:13.324 The current transaction ID at source is 522
-2020-12-11 06:01:13.327 There are 5 transactions to be synced in this run.
-2020-12-11 06:01:23.106 Database synchronized successfully. Last transaction id at target is 522
-[hive@c4186-node3 ACID COPY]$ ll
+
+[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest DEBUG
+2020-12-28 08:29:01.290 Enabling DEBUG output
+2020-12-28 08:29:01.297 Initiating run to replicate repltest to repltest
+2020-12-28 08:29:06.402 Database repltest transaction ID at target is currently |1029|
+2020-12-28 08:29:06.407 Skipping external tables in incremental dump
+2020-12-28 08:29:22.185 The current transaction ID at source is |1034|
+2020-12-28 08:29:22.190 Database repltest incremental dump has been generated at |hdfs://c2186-node2.coelab.cloudera.com:8020/apps/hive/repl/276b8090-7ddf-43ed-929b-6adc40f42249|.
+2020-12-28 08:29:22.196 There are 5 transactions to be synced in this run.
+2020-12-28 08:29:22.201 External tables not included.
+2020-12-28 08:29:41.424 Data load at target cluster completed. Verifying....
+2020-12-28 08:29:46.790 Database replication completed SUCCESSFULLY. Last transaction id at target is |1034|
+```
+Console output won't differ much in non-DEBUG mode. The extra logging will be in the log file at the backend.
+```
+[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest 
+2020-12-28 08:29:52.253 Initiating run to replicate repltest to repltest
+2020-12-28 08:29:57.346 Database repltest transaction ID at target is currently |1034|
+2020-12-28 08:29:57.352 Skipping external tables in incremental dump
+2020-12-28 08:30:02.849 The current transaction ID at source is |1036|
+2020-12-28 08:30:02.856 Database repltest incremental dump has been generated at |hdfs://c2186-node2.coelab.cloudera.com:8020/apps/hive/repl/064b89f9-1665-49c0-b945-3da3990c00fe|.
+2020-12-28 08:30:02.862 There are 2 transactions to be synced in this run.
+2020-12-28 08:30:02.867 External tables not included.
+2020-12-28 08:30:21.742 Data load at target cluster completed. Verifying....
+2020-12-28 08:30:26.677 Database replication completed SUCCESSFULLY. Last transaction id at target is |1036|
+[hive@c4186-node3 Hive_acid_table_replication]$ 
 ```
