@@ -26,4 +26,4 @@ STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
 TMP_DIR="./tmp/run_$(date +"%Y_%m_%d_%I_%M_%p")"
 LOG_DIR="./logs"
-repl_log_file="%{LOG_DIR}/replication_$(date +"%Y_%m_%d_%I_%M_%p").log"
+repl_log_file="${LOG_DIR}/replication_$(date +"%Y_%m_%d_%I_%M_%p").log"
