@@ -6,12 +6,12 @@ retrieve_current_target_repl_id() {
 # Retrieve current last_repl_id for database at target
 #
 local out_file="${TMP_DIR}/repl_status_beeline.out"
-repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
+beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  -f ${STATUS_HQL} \
  >${out_file} \
- 2>>${repl_log_file} )
+ 2>>${repl_log_file}
 
 # Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
 if [[ ${loglevel} == "INFO" ]]; then
@@ -33,12 +33,12 @@ retrieve_post_load_target_repl_id() {
 # Retrieve current last_repl_id for database at target
 #
 local out_file="${TMP_DIR}/post_load_repl_status_beeline.out"
-post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
+beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  -f ${STATUS_HQL} \
  > ${out_file} \
- 2>>${repl_log_file} )
+ 2>>${repl_log_file} 
  
 # Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
 if [[ ${loglevel} == "INFO" ]]; then
@@ -61,12 +61,12 @@ gen_bootstrap_dump_source() {
 #
 local HQL_FILE=$1
 local out_file="${TMP_DIR}/repl_fulldump_beeline.out"
-repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
+beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  -f ${HQL_FILE} \
  > ${out_file} \
- 2>>${repl_log_file})
+ 2>>${repl_log_file}
 
 
 # Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
@@ -98,13 +98,13 @@ gen_incremental_dump_source() {
 #
 local HQL_FILE=$1
 local out_file="${TMP_DIR}/repl_incdump_beeline.out"
-repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
+beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  --hivevar last_repl_id=${last_repl_id} \
  -f ${HQL_FILE} \
  > ${out_file} \
- 2>>${repl_log_file})
+ 2>>${repl_log_file}
 
 
 # Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
@@ -141,13 +141,13 @@ src_dump_path="${source_hdfs_prefix}${dump_path}"
 local out_file="${TMP_DIR}/repl_load_beeline.out"
 local LOAD_HQL=$1
 
-local repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
+beeline -u ${target_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  --hivevar src_dump_path=${src_dump_path} \
  -f ${LOAD_HQL} \
   >${out_file} \
-  2>>${repl_log_file})
+  2>>${repl_log_file}
 
 # Confirm database load succeeded
 
