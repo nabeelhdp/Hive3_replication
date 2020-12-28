@@ -19,7 +19,7 @@ Use HDP 3.1.5 or CDP versions to use this script.
 |source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Eg. hdfs://c2186-node2.coelab.cloudera.com:8020"|
 |beeline_opts|Options to pass to beeline when launching . Defaults to verbose=false --showHeader=false --silent=true|
 |beeline_user|User running beeline. In kerberized environments this may be ignored|
-||Locations for the various Hive QL scripts for each action. Don't change unless necessary|
+|======|Locations for the various Hive QL scripts for each action. Don't change unless necessary|
 |HQL_DIR|./HQL|
 |INC_DUMP_HQL|${HQL_DIR}/repldump.hql|
 |BOOTSTRAP_HQL|${HQL_DIR}/replbootstrap.hql|
