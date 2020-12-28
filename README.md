@@ -16,8 +16,8 @@ Use HDP 3.1.5 or CDP versions to use this script.
 | dblist      | # List of acceptable dbnames when passed via argument to script. This is for a sanity check to avoid accidental full dump generation in prod for mistyped target database names.       |
 |include_external_tables|true/false|
 |repl_root|location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix |
-|source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Eg. hdfs://c2186-node2.coelab.cloudera.com:8020"|
-|beeline_opts|Options to pass to beeline when launching . Defaults to verbose=false --showHeader=false --silent=true|
+|source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Eg. `hdfs://c2186-node2.coelab.cloudera.com:8020`"|
+|beeline_opts|Options to pass to beeline when launching . Defaults to `verbose=false --showHeader=false --silent=true`|
 |beeline_user|User running beeline. In kerberized environments this may be ignored|
 |TMP_DIR| Location to store temporary files used for parsing beeline output|
 |LOG_DIR| Location to write script logs|
@@ -43,9 +43,6 @@ FULL DUMP  (interactive prompt added for safety. Full dumps can add significant 
 2020-12-11 06:00:02.476 Initiating run to replicate repltest to repltest_replica
 2020-12-11 06:00:02.480 ===================================================================
 2020-12-11 06:00:07.393 No replication id detected at target. Full data dump dump needs to be initiated.
-Continue with full dump ? Y:N 
-Y
-
 2020-12-11 06:00:12.781 Database repltest is being synced for the first time. Initiating full dump.
 2020-12-11 06:00:28.454 Source transaction id: |517|
 2020-12-11 06:00:28.461 Database repltest full dump has been generated at hdfs://c2186-node2.coelab.cloudera.com:8020/apps/hive/repl/62f21edc-6fee-4eb1-a7ce-26fee07f3516.
