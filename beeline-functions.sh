@@ -152,5 +152,5 @@ beeline -u ${target_jdbc_url} ${beeline_opts} \
 # Confirm database load succeeded
 
 grep "INFO  : OK" ${out_file}  && return 1
-return 1
+return 0
 }
