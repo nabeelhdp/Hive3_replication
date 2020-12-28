@@ -14,9 +14,9 @@ repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  2>>${repl_log_file} )
 
 # Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
-if [[ loglevel == "INFO" ]]; then
+if [[ ${loglevel} == "INFO" ]]; then
   last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
-elif [[ loglevel == "DEBUG" ]]; then
+elif [[ ${loglevel} == "DEBUG" ]]; then
   last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 else
   printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
@@ -41,9 +41,9 @@ post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  2>>${repl_log_file} )
  
 # Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
-if [[ loglevel == "INFO" ]]; then
+if [[ ${loglevel} == "INFO" ]]; then
   post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
-elif [[ loglevel == "DEBUG" ]]; then
+elif [[ ${loglevel} == "DEBUG" ]]; then
   post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 else
   printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
