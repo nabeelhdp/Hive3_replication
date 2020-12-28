@@ -24,6 +24,7 @@ LOAD_HQL="${HQL_DIR}/replload.hql"
 EXT_LOAD_HQL="${HQL_DIR}/replextload.hql"
 STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
-TMP_DIR="./tmp/run_$(date +"%Y_%m_%d_%I_%M_%p")"
+current_time=$(date +"%Y_%m_%d_%I_%M_%p")
+TMP_DIR="./tmp/run_${current_time}"
 LOG_DIR="./logs"
-repl_log_file="${LOG_DIR}/replication_$(date +"%Y_%m_%d_%I_%M_%p").log"
+repl_log_file="${LOG_DIR}/replication_${current_time}.log"
