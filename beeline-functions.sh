@@ -13,7 +13,14 @@ repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  >${out_file} \
  2>>${repl_log_file} )
 
-last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
+# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
+if [[ loglevel == "INFO" ]]; then
+  last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
+elif [[ loglevel == "DEBUG" ]]; then
+  last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
+else
+  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
+fi  
 
 [[ ${last_repl_id} =~ ${re} ]] && return 0
 return 1
@@ -33,7 +40,14 @@ post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  > ${out_file} \
  2>>${repl_log_file} )
  
-post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
+# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
+if [[ loglevel == "INFO" ]]; then
+  post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
+elif [[ loglevel == "DEBUG" ]]; then
+  post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
+else
+  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
+fi  
 
 [[ ${post_load_repl_id} =~ ${re} ]] && return 0
 return 1
@@ -62,11 +76,6 @@ dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
 
 if [[ ${dump_path} != ${repl_root}* ]]; then
   printmessage "Could not generate database dump for ${dbname} at source.\n"
-  # If debug is enabled, the output would already be written earlier. So
-  # skipping a write of output into log a second time.
-  if [[ "${loglevel}" == "INFO" ]]; then
-    cat ${out_file} >> ${repl_log_file}
-  fi
   return 0
 else
   return 1
@@ -120,11 +129,6 @@ local repl_load_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -f ${LOAD_HQL} \
   >${out_file} \
   2>>${repl_log_file})
-
-if [[ "${loglevel}" == "$DEBUG" ]]; then
-  printmessage "REPL LOAD Beeline output :"
-  cat ${out_file} >> ${repl_log_file}
-fi
 
 # Confirm database load succeeded
 
