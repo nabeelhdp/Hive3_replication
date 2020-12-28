@@ -19,7 +19,8 @@ Use HDP 3.1.5 or CDP versions to use this script.
 |source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Eg. hdfs://c2186-node2.coelab.cloudera.com:8020"|
 |beeline_opts|Options to pass to beeline when launching . Defaults to verbose=false --showHeader=false --silent=true|
 |beeline_user|User running beeline. In kerberized environments this may be ignored|
-
+|TMP_DIR| Location to store temporary files used for parsing beeline output|
+|LOG_DIR| Location to write script logs|
 
 | Locations for the various Hive QL scripts for each action. DO NOT CHANGE| |
 | ----------- | ----------- |
@@ -31,8 +32,6 @@ Use HDP 3.1.5 or CDP versions to use this script.
 |LOAD_HQL|${HQL_DIR}/replload.hql|
 |EXT_LOAD_HQL|${HQL_DIR}/replextload.hql|
 |STATUS_HQL|${HQL_DIR}/replstatus.hql|
-|TMP_DIR|./tmp/run_$(date +"%Y_%m_%d_%I_%M_%p")|
-|LOG_DIR|./logs|
 |repl_log_file|${LOG_DIR}/replication_$(date +"%Y_%m_%d_%I_%M_%p").log"|
 # Sample run 
 
