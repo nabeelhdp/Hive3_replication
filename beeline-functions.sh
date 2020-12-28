@@ -68,9 +68,19 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  > ${out_file} \
  2>>${repl_log_file})
 
- # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
+
+# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
+if [[ ${loglevel} == "INFO" ]]; then
+  # Extract dump path and transaction id from the output
+  dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
+  dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
+elif [[ ${loglevel} == "DEBUG" ]]; then
+  # Extract dump path and transaction id from the output
+  dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+  dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
+else
+  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
+fi  
 
  # Confirm database dump succeeded
 
@@ -96,10 +106,19 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  > ${out_file} \
  2>>${repl_log_file})
 
-# Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
 
+# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
+if [[ ${loglevel} == "INFO" ]]; then
+  # Extract dump path and transaction id from the output
+  dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
+  dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
+elif [[ ${loglevel} == "DEBUG" ]]; then
+  # Extract dump path and transaction id from the output
+  dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+  dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
+else
+  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
+fi  
 # Confirm database dump succeeded
 
 if [[ ${dump_path} != ${repl_root}* ]]
