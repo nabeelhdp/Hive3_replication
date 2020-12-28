@@ -22,9 +22,6 @@ else
   printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
 fi  
 
-[[ ${last_repl_id} =~ ${re} ]] && return 0
-return 1
-
 }
 
 retrieve_post_load_target_repl_id() {
@@ -47,10 +44,7 @@ elif [[ ${loglevel} == "DEBUG" ]]; then
   post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 else
   printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
-fi  
-
-[[ ${post_load_repl_id} =~ ${re} ]] && return 0
-return 1
+fi
 
 }
 
