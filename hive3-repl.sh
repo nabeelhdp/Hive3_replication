@@ -57,6 +57,7 @@ if [[ ${dbvalidity} == "0" ]]; then
 fi
 
 [ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR} 
+[ -d ${LOG_DIR} ] || mkdir -p ${LOG_DIR} 
 
 echo "===================================================================" >>${repl_log_file}
 printmessage "Initiating run to replicate ${dbname} to ${dbname} "
