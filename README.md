@@ -21,10 +21,10 @@ Use HDP 3.1.5 or CDP versions to use this script.
 |beeline_user|User running beeline. In kerberized environments this may be ignored|
 |TMP_DIR| Location to store temporary files used for parsing beeline output|
 |LOG_DIR| Location to write script logs|
+|HQL_DIR|./HQL|
 
 | Locations for the various Hive QL scripts for each action. DO NOT CHANGE| |
 | ----------- | ----------- |
-|HQL_DIR|./HQL|
 |INC_DUMP_HQL|${HQL_DIR}/repldump.hql|
 |BOOTSTRAP_HQL|${HQL_DIR}/replbootstrap.hql|
 |EXT_INC_DUMP_HQL|${HQL_DIR}/replextdump.hql|
