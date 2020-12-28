@@ -15,7 +15,7 @@ Use HDP 3.1.5 or CDP versions to use this script.
 | source_jdbc_url   |  JDBC URL for source cluster. Copy this value from the Ambari UI.        |
 | dblist      | # List of acceptable dbnames when passed via argument to script. This is for a sanity check to avoid accidental full dump generation in prod for mistyped target database names.       |
 |include_external_tables|true/false|
-|repl_root|location in target hdfs where external tables will be copied to |
+|repl_root|location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix |
 |source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Eg. hdfs://c2186-node2.coelab.cloudera.com:8020"|
 |beeline_opts|Options to pass to beeline when launching . Defaults to verbose=false --showHeader=false --silent=true|
 |beeline_user|User running beeline. In kerberized environments this may be ignored|
