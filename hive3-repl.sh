@@ -31,6 +31,9 @@ if [[ "$#" > 2 ]] || [[ "$#" < 1 ]]; then
   script_usage
 fi
 
+[ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR} 
+[ -d ${LOG_DIR} ] || mkdir -p ${LOG_DIR} 
+
 # If argument count is 1 or 2, the first argument is the db name 
 dbname=$1
 # By default, loglevel is INFO
@@ -55,9 +58,6 @@ if [[ ${dbvalidity} == "0" ]]; then
   printmessage "Invalid target database name specified. Falling back to source name."
   dbname=${dbname}
 fi
-
-[ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR} 
-[ -d ${LOG_DIR} ] || mkdir -p ${LOG_DIR} 
 
 echo "===================================================================" >>${repl_log_file}
 printmessage "Initiating run to replicate ${dbname} to ${dbname} "
