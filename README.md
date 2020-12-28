@@ -8,8 +8,7 @@ Try running the manual steps in the ManualSteps.md document before running the s
 # Recommended : 
 Use HDP 3.1.5 or CDP versions to use this script.
 
-# env.sh parameter descriptions : 
-
+# Configs
 | Parameter      | Description |
 | ----------- | ----------- |
 | target_jdbc_url      | JDBC URL for target cluster. Copy this value from the Ambari UI.       |
