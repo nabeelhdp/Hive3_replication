@@ -13,11 +13,6 @@ repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  >${out_file} \
  2>>${repl_log_file} )
 
- if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL STATUS Beeline output : "
-   cat ${out_file} >> ${repl_log_file}
- fi
-
 last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
 
 [[ ${last_repl_id} =~ ${re} ]] && return 0
@@ -37,12 +32,7 @@ post_load_repl_status_retval=$(beeline -u ${target_jdbc_url} ${beeline_opts} \
  -f ${STATUS_HQL} \
  > ${out_file} \
  2>>${repl_log_file} )
-
- if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL STATUS Beeline output : "
-   cat ${out_file} >> ${repl_log_file}
- fi
-
+ 
 post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
 
 [[ ${post_load_repl_id} =~ ${re} ]] && return 0
@@ -63,11 +53,6 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
  -f ${HQL_FILE} \
  > ${out_file} \
  2>>${repl_log_file})
-
-if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "Beeline output :"
-   cat ${out_file} >> ${repl_log_file}
-fi
 
  # Extract dump path and transaction id from the output
 dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
@@ -106,21 +91,11 @@ repl_dump_retval=$(beeline -u ${source_jdbc_url} ${beeline_opts} \
 dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
 dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
 
-if [[ "${loglevel}" == "DEBUG" ]]; then
-   printmessage "REPL DUMP Beeline output :"
-   cat ${out_file} >> ${repl_log_file}
-fi
-
 # Confirm database dump succeeded
 
 if [[ ${dump_path} != ${repl_root}* ]]
  then
   printmessage "Could not generate database dump for ${dbname} at source.\n"
-  # If debug is enabled, the output would already be written earlier. So
-  # skipping a write of output into log a second time.
-  if [[ "${loglevel}" == "INFO" ]]; then
-    cat ${out_file} >> ${repl_log_file}
-  fi
   return 0
 else
   return 1
@@ -152,9 +127,6 @@ if [[ "${loglevel}" == "$DEBUG" ]]; then
 fi
 
 # Confirm database load succeeded
-#
-# return 0 returns to where the function was called.  $? contains 0 (success).
-# return 1 returns to where the function was called.  $? contains 1 (failure).
 
 grep "INFO  : OK" ${out_file}  && return 0
 return 1
