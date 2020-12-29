@@ -17,7 +17,6 @@ Use HDP 3.1.5 or CDP versions to use this script.
 |include_external_tables|true/false|
 |repl_root|location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix |
 |source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Eg. `hdfs://c2186-node2.coelab.cloudera.com:8020`"|
-|beeline_opts|Options to pass to beeline when launching . Defaults to `verbose=false --showHeader=false --silent=true`|
 |beeline_user|User running beeline. In kerberized environments this may be ignored|
 |TMP_DIR| Directory to store temporary files used for parsing beeline output|
 |LOG_DIR| Directory to write script logs|
@@ -33,6 +32,8 @@ Use HDP 3.1.5 or CDP versions to use this script.
 |EXT_LOAD_HQL|${HQL_DIR}/replextload.hql|
 |STATUS_HQL|${HQL_DIR}/replstatus.hql|
 |repl_log_file|${LOG_DIR}/replication_$(date +"%Y_%m_%d_%I_%M_%p").log"|
+|beeline_opts| Options to pass to beeline when launching. To change, use DEBUG option when running the script. Do not change here, as it breaks output parsing. Defaults to `verbose=false --showHeader=false --silent=true`|
+
 # Sample run 
 
 First time - 
