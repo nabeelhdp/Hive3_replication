@@ -15,6 +15,11 @@
 source ./env.sh
 
 # ----------------------------------------------------------------------------
+# Set global variables that should not be changed by user
+#
+source ./init.sh
+
+# ----------------------------------------------------------------------------
 # Source common functions
 #
 source ./repl-common.sh
@@ -36,8 +41,6 @@ fi
 
 # If argument count is 1 or 2, the first argument is the db name 
 dbname=$1
-# By default, loglevel is INFO
-loglevel="INFO"
 
 # If second argument exists, it should be DEBUG, else ignore
 if [[ "$2" == "DEBUG" ]]; then
@@ -62,17 +65,6 @@ fi
 echo "===================================================================" >>${repl_log_file}
 printmessage "Initiating run to replicate ${dbname} to ${dbname} "
 echo "==================================================================="  >>${repl_log_file}
-
-# Regex to detect if transaction ID is number
-re='^[0-9]+$'
-
-# For one run of this script, we expect only one dump path.
-# Hence declaring it as global var to return from functions.
-dump_path=""
-dump_txid=""
-
-last_repl_id=""
-post_load_repl_id=""
 
 # Retrieve the current state of replication in the target cluster.
 retrieve_current_target_repl_id
