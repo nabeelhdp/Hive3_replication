@@ -6,24 +6,19 @@ source_jdbc_url="jdbc:hive2://c2186-node2.coelab.cloudera.com:2181,c2186-node3.c
 
 # List of acceptable dbnames when passed via argument to script. This is for a sanity check to avoid accidental full dump generation in prod for mistyped target database names.
 dblist="repltest"
+
 include_external_tables=false
+
+# location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix
 repl_root="/apps/hive/repl"
+
+# Prefix to access HDFS locations at source cluster as accessed from target
 #source_hdfs_prefix="hdfs://c2186"
 source_hdfs_prefix="hdfs://c2186-node2.coelab.cloudera.com:8020"
-beeline_opts="--verbose=false --showHeader=false --silent=true"
-beeline_user="hive"
 
-# Locations for the various Hive QL scripts for each action.
-HQL_DIR="./HQL"
-INC_DUMP_HQL="${HQL_DIR}/repldump.hql"
-BOOTSTRAP_HQL="${HQL_DIR}/replbootstrap.hql"
-EXT_INC_DUMP_HQL="${HQL_DIR}/replextdump.hql"
-EXT_BOOTSTRAP_HQL="${HQL_DIR}/replextbootstrap.hql"
-LOAD_HQL="${HQL_DIR}/replload.hql"
-EXT_LOAD_HQL="${HQL_DIR}/replextload.hql"
-STATUS_HQL="${HQL_DIR}/replstatus.hql"
+beeline_user="hive"
 
 current_time=$(date +"%Y_%m_%d_%I_%M_%p")
 TMP_DIR="./tmp/run_${current_time}"
 LOG_DIR="./logs"
-repl_log_file="${LOG_DIR}/replication_${current_time}.log"
+HQL_DIR="./HQL"
