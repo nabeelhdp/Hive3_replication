@@ -13,7 +13,7 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 * `repl-common.sh` : Some miscellaneous functions for logging etc are defined here.
 
 # Configs
-| Parameter      | Description |
+| Parameter | Description |
 | ----------- | ----------- |
 | target_jdbc_url      | JDBC URL for target cluster. Copy this value from the Ambari UI.       |
 | source_jdbc_url   |  JDBC URL for source cluster. Copy this value from the Ambari UI.        |
