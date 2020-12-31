@@ -70,7 +70,9 @@ INCREMENTAL DUMP
 2020-12-28 08:29:41.424 Data load at target cluster completed. Verifying....
 2020-12-28 08:29:46.790 Database replication completed SUCCESSFULLY. Last transaction id at target is |1034|
 ```
-Console output won't differ much in non-DEBUG mode. The extra logging will be in the log file at the backend.
+Console output won't differ much in non-DEBUG mode. 
+The backend log will contain progress details of every transaction applied at the target database.
+This is helpful when you want to track the progress for large databases.
 ```
 [hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest 
 2020-12-28 08:29:52.253 Initiating run to replicate repltest to repltest
