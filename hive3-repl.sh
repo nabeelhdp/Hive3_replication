@@ -63,8 +63,9 @@ if [[ ${dbvalidity} == "0" ]]; then
 fi
 
 echo "===================================================================" >>${repl_log_file}
-printmessage "Initiating run to replicate ${dbname} to ${dbname} "
+printmessage "Initiating run to replicate ${dbname} to ${dbname}."
 echo "==================================================================="  >>${repl_log_file}
+echo " For detailed logging, run tail -f on ${repl_log_file}"
 
 # Retrieve the current state of replication in the target cluster.
 retrieve_current_target_repl_id
