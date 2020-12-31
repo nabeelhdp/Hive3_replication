@@ -36,6 +36,8 @@ Use HDP 3.1.5 or CDP versions to use this script. Tested on HDP 3.1.4.
 3. If the cluster is kereberized, obtain the kerberos tickets.
 4. Launch the script with the database name as argument. Use DEBUG if necessary to track per transaction replication status in the log file.
 
+# Sample run 
+
 First time - 
 FULL DUMP  (interactive prompt added for safety. Full dumps can add significant file count and load at source)
 ```
