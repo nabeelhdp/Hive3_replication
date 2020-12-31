@@ -3,7 +3,7 @@
 retrieve_current_target_repl_id() {
 
 # ----------------------------------------------------------------------------
-# Retrieve current last_repl_id for database at target
+# Retrieve current last_repl_id for database at target before replication
 #
 local out_file="${TMP_DIR}/repl_status_beeline.out"
 beeline -u ${target_jdbc_url} ${beeline_opts} \
@@ -27,7 +27,7 @@ fi
 retrieve_post_load_target_repl_id() {
 
 # ----------------------------------------------------------------------------
-# Retrieve current last_repl_id for database at target
+# Retrieve current last_repl_id for database at target after replication
 #
 local out_file="${TMP_DIR}/post_load_repl_status_beeline.out"
 beeline -u ${target_jdbc_url} ${beeline_opts} \
@@ -76,7 +76,8 @@ else
   printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
 fi  
 
- # Confirm database dump succeeded
+ # Confirm database dump succeeded by verifying if location string returned 
+ # begins with configured location for replication dump.
 
 if [[ ${dump_path} != ${repl_root}* ]]; then
   printmessage "Could not generate database dump for ${dbname} at source.\n"
@@ -113,7 +114,9 @@ elif [[ ${loglevel} == "DEBUG" ]]; then
 else
   printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
 fi  
-# Confirm database dump succeeded
+
+# Confirm database dump succeeded by verifying if location string returned 
+# begins with configured location for replication dump.
 
 if [[ ${dump_path} != ${repl_root}* ]]
  then
@@ -143,8 +146,7 @@ beeline -u ${target_jdbc_url} ${beeline_opts} \
   >${out_file} \
   2>>${repl_log_file}
 
-# Confirm database load succeeded
-
+# Confirm database load succeeded. Beeline output will have an OK at the end if the load went successfully.
 grep "INFO  : OK" ${out_file}  && return 1
 return 0
 }
