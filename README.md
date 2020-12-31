@@ -6,13 +6,14 @@ Utilizes the HIVE REPL features used under the hood in DLM.
 Try running the manual steps in the ManualSteps.md document before running the script.
 
 # Recommended : 
-Use HDP 3.1.5 or CDP versions to use this script.
+Use HDP 3.1.5 or CDP versions to use this script. Tested on HDP 3.1.4.
+
 # Files :
-* env.sh : Configure environment variables here before running the script.
-* hive3-repl.sh : Main script to invoke. Run as shown later in the doc.
-* beeline-functions.sh : Functions that make beeline calls are defined here.
-* init.sh : All global variables are initialized here. Do not change anything here.
-* repl-common.sh : Some miscellaneous functions for logging etc are defined here.
+* `env.sh` : Configure environment variables here before running the script.
+* `hive3-repl.sh` : Main script to invoke. Run as shown later in the doc.
+* `beeline-functions.sh` : Functions that make beeline calls are defined here.
+* `init.sh` : All global variables are initialized here. Do not change anything here.
+* `repl-common.sh` : Some miscellaneous functions for logging etc are defined here.
 
 # Configs
 | Parameter      | Description |
