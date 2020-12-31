@@ -34,7 +34,10 @@ Use HDP 3.1.5 or CDP versions to use this script. Tested on HDP 3.1.4.
 1. Update configurations in env.sh
 2. Ensure target cluster has the database created
 3. If the cluster is kereberized, obtain the kerberos tickets.
-4. Launch the script with the database name as argument. Use DEBUG if necessary to track per transaction replication status in the log file.
+4. Launch the script with the database name as argument. 
+5. Use DEBUG if necessary to track per transaction replication status in the log file.
+6. Track the script progress in the last file in the logs folder.
+7. Upon successfull completion, the updated transaction id at the target database will be displayed.
 
 # Sample run 
 
