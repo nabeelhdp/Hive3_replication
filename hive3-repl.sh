@@ -58,8 +58,8 @@ for val in ${dblist}; do
 done
 
 if [[ ${dbvalidity} == "0" ]]; then
-  printmessage "Invalid target database name specified. Falling back to source name."
-  dbname=${dbname}
+  printmessage "Invalid target database name specified. Exiting!"
+  exit 1
 fi
 
 echo "===================================================================" >>${repl_log_file}
