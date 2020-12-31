@@ -42,7 +42,7 @@ Use HDP 3.1.5 or CDP versions to use this script. Tested on HDP 3.1.4.
 # Sample run 
 
 First time - 
-FULL DUMP  (interactive prompt added for safety. Full dumps can add significant file count and load at source)
+FULL DUMP 
 ```
 [hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest DEBUG
 2020-12-28 08:28:00.672 Enabling DEBUG output
@@ -59,7 +59,7 @@ FULL DUMP  (interactive prompt added for safety. Full dumps can add significant 
 2020-12-28 08:28:31.926 Data load at target cluster completed. Verifying....
 2020-12-28 08:28:37.368 Database replication completed SUCCESSFULLY. Last transaction id at target is |1029|
 ```
-INCREMENTAL DUMP (interactive prompt added for safety. Full dumps can add significant file count and load at source)
+INCREMENTAL DUMP 
 ```
 [hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest DEBUG
 2020-12-28 08:29:01.290 Enabling DEBUG output
