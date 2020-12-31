@@ -7,6 +7,12 @@ Try running the manual steps in the ManualSteps.md document before running the s
 
 # Recommended : 
 Use HDP 3.1.5 or CDP versions to use this script.
+# Files :
+* env.sh : Configure environment variables here before running the script.
+* hive3-repl.sh : Main script to invoke. Run as shown later in the doc.
+* beeline-functions.sh : Functions that make beeline calls are defined here.
+* init.sh : All global variables are initialized here. Do not change anything here.
+* repl-common.sh : Some miscellaneous functions for logging etc are defined here.
 
 # Configs
 | Parameter      | Description |
@@ -16,25 +22,18 @@ Use HDP 3.1.5 or CDP versions to use this script.
 | dblist      | # List of acceptable dbnames when passed via argument to script. This is for a sanity check to avoid accidental full dump generation in prod for mistyped target database names.       |
 |include_external_tables|true/false|
 |repl_root|location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix |
-|source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Eg. `hdfs://c2186-node2.coelab.cloudera.com:8020`"|
-|beeline_user|User running beeline. In kerberized environments this may be ignored|
-|TMP_DIR| Directory to store temporary files used for parsing beeline output|
-|LOG_DIR| Directory to write script logs|
-|HQL_DIR| Directory to hold all HiveQL script files.|
+|source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Can use the Namenode IP:port or cluster nameservice id. Eg. `hdfs://c2186-node2.coelab.cloudera.com:8020` or `hdfs://c2186`"|
+|beeline_user|User running beeline. In kerberized environments this may be ignored.|
+|TMP_DIR| Directory to store temporary files used for parsing beeline output. Default: ./tmp|
+|LOG_DIR| Directory to write script logs.  Default: ./logs|
+|HQL_DIR| Directory to hold all HiveQL script files. Default: ./HQL|
 
-| Locations for the various Hive QL scripts for each action. DO NOT CHANGE| |
-| ----------- | ----------- |
-|INC_DUMP_HQL|${HQL_DIR}/repldump.hql|
-|BOOTSTRAP_HQL|${HQL_DIR}/replbootstrap.hql|
-|EXT_INC_DUMP_HQL|${HQL_DIR}/replextdump.hql|
-|EXT_BOOTSTRAP_HQL|${HQL_DIR}/replextbootstrap.hql|
-|LOAD_HQL|${HQL_DIR}/replload.hql|
-|EXT_LOAD_HQL|${HQL_DIR}/replextload.hql|
-|STATUS_HQL|${HQL_DIR}/replstatus.hql|
-|repl_log_file|${LOG_DIR}/replication_$(date +"%Y_%m_%d_%I_%M_%p").log"|
-|beeline_opts| Options to pass to beeline when launching. To change, use DEBUG option when running the script. Do not change here, as it breaks output parsing. Defaults to `verbose=false --showHeader=false --silent=true`|
+# Instructions to run 
 
-# Sample run 
+# Update configurations in env.sh
+# Ensure target cluster has the database created
+# If the cluster is kereberized, obtain the kerberos tickets.
+# Launch the script with the database name as argument. Use DEBUG if necessary to track per transaction replication status in the log file.
 
 First time - 
 FULL DUMP  (interactive prompt added for safety. Full dumps can add significant file count and load at source)
