@@ -70,11 +70,13 @@ echo " For detailed logging, run tail -f on ${repl_log_file}"
 # Retrieve the current state of replication in the target cluster.
 retrieve_current_target_repl_id
 
+# If the REPL STATUS output is "NULL", it means the database has not been replicated.
+# So a full dump will be generated.
 if [[ ${last_repl_id} == "NULL" ]]; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
   printmessage "Database ${dbname} is being synced for the first time. Initiating full dump."
   
-  # dump generation command returns latest transaction id at source
+  # Point to corresponding HQL file depending on whether external tables are to be included or not
   if [[ ${include_external_tables} == 'true' ]]; then
     printmessage "Including external tables in full dump"
     gen_bootstrap_dump_source ${EXT_BOOTSTRAP_HQL}
@@ -83,15 +85,18 @@ if [[ ${last_repl_id} == "NULL" ]]; then
     gen_bootstrap_dump_source ${BOOTSTRAP_HQL}
   fi 
   
+  # dump_txid is set in the above function to the current transaction ID at source cluster for the database
   source_latest_txid=${dump_txid}
   printmessage "Source transaction id: |${source_latest_txid}|"
 
+  # If dump is generated successfully, a proper integer value is returned.
   if [[ ${source_latest_txid} > 0 ]]; then
     printmessage "Database ${dbname} full dump has been generated at |${source_hdfs_prefix}${dump_path}|."
     printmessage "The current transaction ID at source is |${source_latest_txid}|"
     printmessage "There are ${source_latest_txid} transactions to be synced in this run."
     printmessage "Initiating data load at target cluster on database ${dbname}."
 
+  # Point to corresponding HQL file depending on whether external tables are to be included or not
     if [[ ${include_external_tables} == 'true' ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
       HQL_FILE=${EXT_LOAD_HQL}
@@ -100,6 +105,8 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       HQL_FILE=${LOAD_HQL}
     fi 
     
+    # Now the source cluster has generated a dump of the database. 
+    # Replay the dump on the target cluster database.
     if replay_dump_at_target ${HQL_FILE}; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
@@ -114,17 +121,19 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       echo -e "See ${repl_log_file} for details. Exiting!" 
       exit 1
     fi 
-    
-  
+   
+  # If source_latest_txid is anything but a proper number, 
+  # it indicates a failure in geenerating the source dump. Exit.
   else
     printmessage "Unable to generate full dump for database ${dbname}. Exiting!."
     exit 1
   fi
 
+# If the database at target cluster already has some transaction replayed, 
+# trigger the source dump as an incremental dump.
 elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${dbname} transaction ID at target is currently |${last_repl_id}|"
 
-  
   # dump generation command returns latest transaction id at source
   if [[ ${include_external_tables} == 'true' ]]; then
     printmessage "Including external tables in incremental dump"
@@ -133,7 +142,8 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     printmessage "Skipping external tables in incremental dump"
     gen_incremental_dump_source ${INC_DUMP_HQL}
   fi 
-  
+ 
+  # dump_txid is set in the above function to the current transaction ID at source cluster for the database
   source_latest_txid=${dump_txid}
   printmessage "The current transaction ID at source is |${source_latest_txid}|"
 
@@ -142,6 +152,7 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "There are ${txn_count} transactions to be synced in this run."
     
+    # Point to corresponding HQL file depending on whether external tables are to be included or not
     if [[ ${include_external_tables} == 'true' ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
       HQL_FILE=${EXT_LOAD_HQL}
@@ -150,6 +161,8 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
       HQL_FILE=${LOAD_HQL}
     fi 
         
+    # Now the source cluster has generated a dump of the database. 
+    # Replay the dump on the target cluster database.
     if replay_dump_at_target ${HQL_FILE}; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
@@ -157,7 +170,8 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
       else
         printmessage "Unable to verify database replication! Post Load repl id: |${post_load_repl_id}|"
-        printmessage "Source repl id: |${source_latest_txid}|"    exit 1
+        printmessage "Source repl id: |${source_latest_txid}|"    
+        exit 1
       fi
     else 
       printmessage "Data load at target cluster failed" 
