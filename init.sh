@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # By default, loglevel is INFO
 loglevel="INFO"
 
@@ -32,6 +31,8 @@ STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
 # location for log file
 repl_log_file="${LOG_DIR}/replication_${current_time}.log"
-# This is the default setting for beeline. To change, use DEBUG option when running the script. 
+
+# This is the default setting for beeline. To change, 
+# use DEBUG option when running the script. 
 # Do not change here, as it breaks output parsing
 beeline_opts="--verbose=false --showHeader=false --silent=true"
