@@ -1,9 +1,8 @@
-# Hive acid table replication
+# Hive database replication
 
-Script to replicate a single database from an HDP cluster to another.
-Generally used for Prod to DR sync.
-Utilizes the HIVE REPL features used under the hood in DLM.
-Try running the manual steps in the ManualSteps.md document before running the script.
+Script to replicate a single Hive database from an HDP cluster to another. 
+Utilizes the HIVE REPL features used under the hood in DLM. Supports replication of managed, external tables and views.
+Try running the manual steps in the ManualSteps.md document before running the script. For instructions, see the section below.
 
 # Recommended : 
 Use HDP 3.1.5 or CDP versions to use this script. Tested on HDP 3.1.4.
