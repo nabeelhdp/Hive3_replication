@@ -25,8 +25,8 @@ source ./init.sh
 source ./repl-common.sh
 source ./beeline-functions.sh
 
-trap trap_log_int INT
-trap trap_log_exit EXIT
+trap trap_log_int INT TERM
+trap trap_log_exit EXIT 
 
 
 ################ MAIN BEGINS HERE #########################
