@@ -61,7 +61,6 @@ FULL DUMP  (interactive prompt added for safety. Full dumps can add significant 
 ```
 INCREMENTAL DUMP (interactive prompt added for safety. Full dumps can add significant file count and load at source)
 ```
-
 [hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest DEBUG
 2020-12-28 08:29:01.290 Enabling DEBUG output
 2020-12-28 08:29:01.297 Initiating run to replicate repltest to repltest
