@@ -149,8 +149,9 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
 
   if [[ ${source_latest_txid} > 0 ]]; then
     printmessage "Database ${dbname} incremental dump has been generated at |${source_hdfs_prefix}${dump_path}|."
-    txn_count=$((${source_latest_txid} - ${last_repl_id}))
-    printmessage "There are ${txn_count} transactions to be synced in this run."
+    # the calculation of txn_count below doesn't match with numEvents that show up in the 
+    #txn_count=$((${source_latest_txid} - ${last_repl_id}))
+    printmessage "Initiating REPL LOAD at destination cluster to replicate ${dbname} to transaction id |${source_latest_txid}|."
     
     # Point to corresponding HQL file depending on whether external tables are to be included or not
     if [[ ${include_external_tables} == 'true' ]]; then
