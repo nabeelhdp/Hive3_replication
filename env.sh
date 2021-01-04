@@ -20,6 +20,9 @@ source_hdfs_prefix="hdfs://c2186-node2.coelab.cloudera.com:8020"
 # User running beeline. In kerberized environments this may be ignored.
 beeline_user="hive"
 
+# Directory where script runs from
+THIS_DIR=$(dirname "$0")
+
 # This location can be changed if needed.
 LOG_DIR="${THIS_DIR}/logs"
 
