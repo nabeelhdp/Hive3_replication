@@ -28,3 +28,6 @@ STATUS_HQL="${HQL_DIR}/replstatus.hql"
 
 # location for log file
 repl_log_file="${LOG_DIR}/replication_${current_time}.log"
+
+# beeline options to be passed
+beeline_opts="--verbose=true --showHeader=true --silent=false"
