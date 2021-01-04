@@ -32,17 +32,15 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 3. Ensure target cluster has the database created
 4. If the cluster is kereberized, obtain the kerberos tickets.
 5. Launch the script with the database name as argument. 
-6. Use DEBUG if necessary to track per transaction replication status in the log file.
-7. Track the script progress in the last file in the logs folder.
-8. Upon successfull completion, the updated transaction id at the target database will be displayed.
+6. Track the script progress in the last file in the logs folder.
+7. Upon successfull completion, the updated transaction id at the target database will be displayed.
 
 # Sample run 
 
 First time - 
 FULL DUMP 
 ```
-[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest DEBUG
-2020-12-28 08:28:00.672 Enabling DEBUG output
+[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest 
 2020-12-28 08:28:00.678 Initiating run to replicate repltest to repltest
 2020-12-28 08:28:05.852 No replication id detected at target. Full data dump dump needs to be initiated.
 2020-12-28 08:28:05.857 Database repltest is being synced for the first time. Initiating full dump.
@@ -58,8 +56,7 @@ FULL DUMP
 ```
 INCREMENTAL DUMP 
 ```
-[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest DEBUG
-2020-12-28 08:29:01.290 Enabling DEBUG output
+[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest 
 2020-12-28 08:29:01.297 Initiating run to replicate repltest to repltest
 2020-12-28 08:29:06.402 Database repltest transaction ID at target is currently |1029|
 2020-12-28 08:29:06.407 Skipping external tables in incremental dump
