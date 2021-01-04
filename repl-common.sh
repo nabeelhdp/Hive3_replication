@@ -23,7 +23,7 @@ trap_log_exit() {
   sed -i '/^$/d' ${repl_log_file}
   
   # Removing lock file upon completion of run
-  rm ${TMP_DIR}/${script_name}.lock 
+  rm ${RUN_DIR}/${script_name}.lock 
 }
 
 check_prev_instance_running() {
