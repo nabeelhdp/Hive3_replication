@@ -39,7 +39,8 @@ fi
 [ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR} 
 [ -d ${LOG_DIR} ] || mkdir -p ${LOG_DIR} 
 
-check_prev_instance_running
+script_name=$(basename -- "$0")
+check_prev_instance_running ${script_name}
 
 # If argument count is 1 or 2, the first argument is the db name 
 dbname=$1
