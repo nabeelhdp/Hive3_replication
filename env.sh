@@ -21,8 +21,8 @@ source_hdfs_prefix="hdfs://c2186-node2.coelab.cloudera.com:8020"
 beeline_user="hive"
 
 # This location can be changed if needed.
-LOG_DIR="./logs"
+LOG_DIR="${THIS_DIR}/logs"
 
 # Set unique value for logs and output directory based on time of script run
 current_time=$(date +"%Y_%m_%d_%I_%M_%p")
-TMP_DIR="./tmp/run_${current_time}"
+TMP_DIR="${THIS_DIR}/tmp/run_${current_time}"
