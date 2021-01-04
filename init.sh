@@ -17,6 +17,8 @@ re='^[0-9]+$'
 # Folder containing HiveQL scripts
 HQL_DIR="./HQL"
 
+RUN_DIR="./run"
+
 # Locations for the various Hive QL scripts for each action.
 INC_DUMP_HQL="${HQL_DIR}/repldump.hql"
 BOOTSTRAP_HQL="${HQL_DIR}/replbootstrap.hql"
