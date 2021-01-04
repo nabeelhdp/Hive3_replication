@@ -42,13 +42,6 @@ fi
 # If argument count is 1 or 2, the first argument is the db name 
 dbname=$1
 
-# If second argument exists, it should be DEBUG, else ignore
-if [[ "$2" == "DEBUG" ]]; then
-  printmessage "Enabling DEBUG output"
-  loglevel="DEBUG" 
-  beeline_opts="--verbose=true --showHeader=true --silent=false"
-fi
-
 # Validate dbname provided against list of valid names specified in env.sh
 dbvalidity="0"
 for val in ${dblist}; do
