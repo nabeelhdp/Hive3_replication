@@ -31,13 +31,15 @@ trap trap_log_exit EXIT
 
 ################ MAIN BEGINS HERE #########################
 
-# Argument count should be either 1 or 2
-if [[ "$#" > 2 ]] || [[ "$#" < 1 ]]; then
+# Argument count should be 1, the dbname
+if [[ "$#" -ne 1 ]]; then
   script_usage
 fi
 
 [ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR} 
 [ -d ${LOG_DIR} ] || mkdir -p ${LOG_DIR} 
+
+check_prev_instance_running
 
 # If argument count is 1 or 2, the first argument is the db name 
 dbname=$1
@@ -105,6 +107,9 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       retrieve_post_load_target_repl_id
       if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
+      elif [[ ${post_load_repl_id} == "NULL" ]] ; then
+        printmessage "Database replication FAILED. No transactions have been applied in this run."
+        # TODO - cleanup directories leftover during failed replication (if any) 
       else
         printmessage "Unable to verify database replication! Post Load repl id: |${post_load_repl_id}|"
         printmessage "Source repl id: |${source_latest_txid}|"    
@@ -163,6 +168,9 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
       retrieve_post_load_target_repl_id
       if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
+      elif [[ ${post_load_repl_id} == ${last_repl_id} ]] ; then
+        printmessage "Database replication FAILED. No transactions have been applied in this run."
+        # TODO - cleanup directories leftover during failed replication (if any) 
       else
         printmessage "Unable to verify database replication! Post Load repl id: |${post_load_repl_id}|"
         printmessage "Source repl id: |${source_latest_txid}|"    
