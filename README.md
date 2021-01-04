@@ -70,19 +70,3 @@ INCREMENTAL DUMP
 2020-12-28 08:29:41.424 Data load at target cluster completed. Verifying....
 2020-12-28 08:29:46.790 Database replication completed SUCCESSFULLY. Last transaction id at target is |1034|
 ```
-Console output won't differ much in non-DEBUG mode. 
-The backend log will contain progress details of every transaction applied at the target database.
-This is helpful when you want to track the progress for large databases.
-```
-[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest 
-2020-12-28 08:29:52.253 Initiating run to replicate repltest to repltest
-2020-12-28 08:29:57.346 Database repltest transaction ID at target is currently |1034|
-2020-12-28 08:29:57.352 Skipping external tables in incremental dump
-2020-12-28 08:30:02.849 The current transaction ID at source is |1036|
-2020-12-28 08:30:02.856 Database repltest incremental dump has been generated at |hdfs://c2186-node2.coelab.cloudera.com:8020/apps/hive/repl/064b89f9-1665-49c0-b945-3da3990c00fe|.
-2020-12-28 08:30:02.862 There are 2 transactions to be synced in this run.
-2020-12-28 08:30:02.867 External tables not included.
-2020-12-28 08:30:21.742 Data load at target cluster completed. Verifying....
-2020-12-28 08:30:26.677 Database replication completed SUCCESSFULLY. Last transaction id at target is |1036|
-[hive@c4186-node3 Hive_acid_table_replication]$ 
-```
