@@ -122,7 +122,6 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       exit 1
     fi 
         
-        
   # If source_latest_txid is anything but a proper number, 
   # it indicates a failure in geenerating the source dump. Exit.
   else
