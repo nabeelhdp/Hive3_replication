@@ -14,10 +14,13 @@ post_load_repl_id=""
 # Regex to detect if transaction ID is number
 re='^[0-9]+$'
 
-# Folder containing HiveQL scripts
-HQL_DIR="./HQL"
+# Directory where script runs from
+THIS_DIR=$(dirname "$0")
 
-RUN_DIR="./run"
+# Folder containing HiveQL scripts
+HQL_DIR="${THIS_DIR}/HQL"
+
+RUN_DIR="${THIS_DIR}/run"
 
 # Locations for the various Hive QL scripts for each action.
 INC_DUMP_HQL="${HQL_DIR}/repldump.hql"
