@@ -96,7 +96,7 @@ if [[ ${last_repl_id} == "NULL" ]]; then
     printmessage "There are ${source_latest_txid} transactions to be synced in this run."
     printmessage "Initiating data load at target cluster on database ${dbname}."
 
-  # Point to corresponding HQL file depending on whether external tables are to be included or not
+    # Point to corresponding HQL file depending on whether external tables are to be included or not
     if [[ ${include_external_tables} == 'true' ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
       HQL_FILE=${EXT_LOAD_HQL}
@@ -113,15 +113,17 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
       else
-        printmessage "Invalid latest transaction id returned from Source : |${source_latest_txid}|"
-        printmessage "Unable to generate incremental dump for database ${dbname}. Exiting!." && exit 1
+        printmessage "Unable to verify database replication! Post Load repl id: |${post_load_repl_id}|"
+        printmessage "Source repl id: |${source_latest_txid}|"    
+        exit 1
       fi
     else 
       printmessage "Data load at target cluster failed" 
       echo -e "See ${repl_log_file} for details. Exiting!" 
       exit 1
     fi 
-   
+        
+        
   # If source_latest_txid is anything but a proper number, 
   # it indicates a failure in geenerating the source dump. Exit.
   else
