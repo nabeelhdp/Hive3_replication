@@ -10,7 +10,9 @@ trap_log_int() {
 
   printmessage "Ctrl-C attempted. Aborting!"
   # Removing lock file upon completion of run
-  rm ${TMP_DIR}/${script_name}.lock }
+  rm ${RUN_DIR}/${script_name}.lock 
+
+}
 
 trap_log_exit() {
 
@@ -27,15 +29,15 @@ trap_log_exit() {
 check_prev_instance_running() {
 
 ## If the lock file exists
-if [ -e ${TMP_DIR}/${script_name}.lock ]; then
+if [ -e ${RUN_DIR}/${script_name}.lock ]; then
 
     ## Check if the PID in the lockfile is a running instance
     ## of ${script_name} to guard against failed runs
-    if ps $(cat ${TMP_DIR}/${script_name}.lock ) | grep ${script_name} >/dev/null; then
+    if ps $(cat ${RUN_DIR}/${script_name}.lock ) | grep ${script_name} >/dev/null; then
         printmessage "Script ${script_name} is already running, exiting"
         exit 1
     else
-        printmessage "Lockfile  ${TMP_DIR}/${script_name}.lock contains a stale PID."
+        printmessage "Lockfile  ${RUN_DIR}/${script_name}.lock contains a stale PID."
         printmessage "A previous replication run may still be running. Please confirm"
         printmessage "there's no replication run in progress and remove the lock file to continue."
         exit 1
@@ -43,7 +45,7 @@ if [ -e ${TMP_DIR}/${script_name}.lock ]; then
     fi
 fi
 ## Create the lockfile by printing the script's PID into it
-echo $$ > ${TMP_DIR}/${script_name}.lock 
+echo $$ > ${RUN_DIR}/${script_name}.lock 
 
 }
 
