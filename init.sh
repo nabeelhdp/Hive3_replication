@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# By default, loglevel is INFO
-loglevel="INFO"
-
 # For one run of this script, we expect only one dump path.
 # Hence declaring it as global var to return from functions.
 dump_path=""
