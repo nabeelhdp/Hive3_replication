@@ -41,7 +41,6 @@ if [ -e ${RUN_DIR}/${script_name}.lock ]; then
         printmessage "A previous replication run may still be running. Please confirm"
         printmessage "there's no replication run in progress and remove the lock file to continue."
         exit 1
-
     fi
 fi
 ## Create the lockfile by printing the script's PID into it
