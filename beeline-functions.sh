@@ -13,14 +13,7 @@ beeline -u ${target_jdbc_url} ${beeline_opts} \
  >${out_file} \
  2>>${repl_log_file}
 
-# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
-if [[ ${loglevel} == "INFO" ]]; then
-  last_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
-elif [[ ${loglevel} == "DEBUG" ]]; then
-  last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
-else
-  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
-fi  
+last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 
 }
 
@@ -37,14 +30,7 @@ beeline -u ${target_jdbc_url} ${beeline_opts} \
  > ${out_file} \
  2>>${repl_log_file} 
  
-# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
-if [[ ${loglevel} == "INFO" ]]; then
-  post_load_repl_id=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file} )
-elif [[ ${loglevel} == "DEBUG" ]]; then
-  post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
-else
-  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
-fi
+post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 
 }
 
@@ -62,22 +48,12 @@ beeline -u ${source_jdbc_url} ${beeline_opts} \
  > ${out_file} \
  2>>${repl_log_file}
 
+# Extract dump path and transaction id from the output
+dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
-# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
-if [[ ${loglevel} == "INFO" ]]; then
-  # Extract dump path and transaction id from the output
-  dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
-  dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
-elif [[ ${loglevel} == "DEBUG" ]]; then
-  # Extract dump path and transaction id from the output
-  dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
-  dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
-else
-  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
-fi  
-
- # Confirm database dump succeeded by verifying if location string returned 
- # begins with configured location for replication dump.
+# Confirm database dump succeeded by verifying if location string returned 
+# begins with configured location for replication dump.
 
 if [[ ${dump_path} != ${repl_root}* ]]; then
   printmessage "Could not generate database dump for ${dbname} at source.\n"
@@ -102,18 +78,9 @@ beeline -u ${source_jdbc_url} ${beeline_opts} \
  2>>${repl_log_file}
 
 
-# Beeline output formats differ between INFO and DEBUG levels. So need to parse accordingly
-if [[ ${loglevel} == "INFO" ]]; then
-  # Extract dump path and transaction id from the output
-  dump_path=$(awk -F\| '(NR==2){gsub(/ /,"", $2);print $2}' ${out_file})
-  dump_txid=$(awk -F\| '(NR==2){gsub(/ /,"", $3);print $3}' ${out_file})
-elif [[ ${loglevel} == "DEBUG" ]]; then
-  # Extract dump path and transaction id from the output
-  dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
-  dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
-else
-  printmessage "Invalid logging level specified. Log level must be INFO or DEBUG."
-fi  
+# Extract dump path and transaction id from the output
+dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
