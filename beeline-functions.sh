@@ -146,7 +146,7 @@ beeline -u ${target_jdbc_url} ${beeline_opts} \
   >${out_file} \
   2>>${repl_log_file}
 
-# Confirm database load succeeded. Beeline output will have an OK at the end if the load went successfully.
-grep "INFO  : OK" ${out_file}  && return 1
-return 0
+local retval=$?
+return ${retval}
+
 }
