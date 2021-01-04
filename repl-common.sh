@@ -9,15 +9,16 @@ printmessage() {
 
 trap_log_int() {
   printmessage "Ctrl-C attempted. Aborting!"
+  rm ${TMP_DIR}/${script_name}.lock 
 }
 
 trap_log_exit() {
   sed -i '/^SLF4J:/d' ${repl_log_file}
   sed -i '/^$/d' ${repl_log_file}
+  rm ${TMP_DIR}/${script_name}.lock 
 }
 
 script_usage() {
-
   echo -e "Usage : ${BASENAME} <database-name> \n"
   echo -e "**  It is recommended to run this script at the target cluster, but it should work in either cluster.\n" 
   echo -e "**  The database name is a required argument and is validated against the dblist variable in env.sh. \n"
