@@ -4,7 +4,9 @@
 use ${hivevar:dbname};
 repl load ${hivevar:dbname} from '${hivevar:src_dump_path}' with (
 'hive.exec.parallel'='true',
-'hive.repl.replica.external.table.base.dir'='/warehouse/tablespace/external/hive',
+'hive.exec.parallel.thread.number'='128',
+'hive.repl.parallel.copy.tasks'='500',
+-- 'hive.repl.replica.external.table.base.dir'='',
 -- 'hive.distcp.privileged.doAs'='beacon',
 'distcp.options.pugprb'='',
 'distcp.options.skipcrccheck'='',
