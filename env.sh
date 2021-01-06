@@ -8,7 +8,7 @@ source_jdbc_url="jdbc:hive2://c2186-node2.coelab.cloudera.com:2181,c2186-node3.c
 dblist="repltest"
 
 # The default behaviour of the REPL command excludes external tables. Set this to true to include external tables in the replication process.
-include_external_tables=false
+include_external_tables=false   # [true|false]
 
 # location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix
 repl_root="/apps/hive/repl"
