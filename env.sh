@@ -19,13 +19,3 @@ source_hdfs_prefix="hdfs://c2186-node2.coelab.cloudera.com:8020"
 
 # User running beeline. In kerberized environments this may be ignored.
 beeline_user="hive"
-
-# Directory where script runs from
-THIS_DIR=$(dirname "$0")
-
-# This location can be changed if needed.
-LOG_DIR="${THIS_DIR}/logs"
-
-# Set unique value for logs and output directory based on time of script run
-current_time=$(date +"%Y_%m_%d_%I_%M_%p")
-TMP_DIR="${THIS_DIR}/tmp/run_${current_time}"
