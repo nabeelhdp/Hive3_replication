@@ -14,12 +14,23 @@ post_load_repl_id=""
 # Regex to detect if transaction ID is number
 re='^[0-9]+$'
 
+
+# Set unique value for logs and output directory based on time of script run
+current_time=$(date +"%Y_%m_%d_%I_%M_%p")
+
 # Directory where script runs from
 THIS_DIR=$(dirname "$0")
+
+# Location of log files for each run. 
+LOG_DIR="${THIS_DIR}/logs"
+
+# Location to place outputs of individual beeline commands run during replication
+TMP_DIR="${THIS_DIR}/tmp/run_${current_time}"
 
 # Folder containing HiveQL scripts
 HQL_DIR="${THIS_DIR}/HQL"
 
+# Folder to put the lock file
 RUN_DIR="${THIS_DIR}/run"
 
 # Locations for the various Hive QL scripts for each action.
