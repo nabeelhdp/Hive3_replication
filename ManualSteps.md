@@ -17,7 +17,7 @@ For a manual test, we need to do the following:
 `create database repltest;`
  Create some tables in the database, and populate some dummy data.
 2) Enable ChangeManager on Database. The '1' below can be any value. It's only to initiate the ChangeManager on the db.
-`alter database repltest properties SET DBPROPERTIES ('repl.source.for'='1')`
+`alter database repltest  SET DBPROPERTIES ('repl.source.for'='1')`
 3) Generate initial (bootstrap) replication dump for database
 `repl dump repltest;`
 4) Note the folder in the output from above, and on the DR cluster beeline session.
