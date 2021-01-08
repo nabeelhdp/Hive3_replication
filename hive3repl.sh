@@ -9,21 +9,24 @@
 # Email       : nmoidu@cloudera.com
 ###################################################################
 
+# Directory where script runs from
+THIS_DIR=$(dirname "$0")
+
 # ----------------------------------------------------------------------------
 # Source environment variables from file
 #
-source ./env.sh
+source ${THIS_DIR}/env.sh
 
 # ----------------------------------------------------------------------------
 # Set global variables that should not be changed by user
 #
-source ./init.sh
+source ${THIS_DIR}/init.sh
 
 # ----------------------------------------------------------------------------
 # Source common functions
 #
-source ./repl-common.sh
-source ./beeline-functions.sh
+source ${THIS_DIR}/repl-common.sh
+source ${THIS_DIR}/beeline-functions.sh
 
 trap trap_log_int INT TERM
 trap trap_log_exit EXIT 
