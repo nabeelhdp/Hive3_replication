@@ -9,8 +9,13 @@ printmessage() {
 trap_log_int() {
 
   printmessage "Ctrl-C attempted. Aborting!"
+ 
   # Removing lock file upon completion of run
-  rm ${RUN_DIR}/${script_name}.lock 
+  # A second script checking the lock and exiting should not remove the lock
+  # of the first instance which is running. Henc adding a pid check
+  if [[$(cat ${RUN_DIR}/${script_name}.lock) == $$]]; then
+    rm ${RUN_DIR}/${script_name}.lock 
+  fi
 
 }
 
@@ -23,7 +28,11 @@ trap_log_exit() {
   sed -i '/^$/d' ${repl_log_file}
   
   # Removing lock file upon completion of run
-  rm ${RUN_DIR}/${script_name}.lock 
+  # A second script checking the lock and exiting should not remove the lock
+  # of the first instance which is running. Henc adding a pid check
+  if [[$(cat ${RUN_DIR}/${script_name}.lock) == $$]]; then
+    rm ${RUN_DIR}/${script_name}.lock 
+  fi
 }
 
 check_prev_instance_running() {
