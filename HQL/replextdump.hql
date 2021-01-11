@@ -1,6 +1,5 @@
 -- This will be run at the source to generate incremental database dumps
 use ${hivevar:dbname};
 repl dump ${hivevar:dbname}  from ${hivevar:last_repl_id} with (
-'hive.repl.include.external.tables'='true',
-'hive.repl.bootstrap.external.tables'='true'
+'hive.repl.include.external.tables'='true'
 );
