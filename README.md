@@ -25,6 +25,25 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 |TMP_DIR| Directory to store temporary files used for parsing beeline output. Default: ./tmp|
 |LOG_DIR| Directory to write script logs.  Default: ./logs|
 
+# Workflow
+The workflow is as follows:
+
+* Takes in a database name alongside other env variables. 
+* Env variables are picked up from configuration file. 
+* Looks up the DR Hive instance for the current replication status of that database.
+* If it’s not present, it goes to the Production hive instance and generates a full dump of the database. 
+    * The dump returns an HDFS path of the dump and the latest transaction id at Production.
+    * Once the production dump is generated, it connects back to DR hive instance and passes the HDFS location to the DR instance to replicate the database.
+    * The events are then replayed on the DR replica database instance.
+    * Post replay, the replication status is looked up again in DR.
+    * Based on a comparison of the Production transaction id and post replay transaction id at DR, displays success or failure message.
+* If an existing version of database exists in DR, it connects to Production Hive instance and passes the last replicated id in DR to production 
+    * The production Hive instance then generates an incremental dump of the database and returns an HDFS path of the dump and the latest transaction id at Production.
+    * Once the production dump is generated, it connects back to the DR hive instance and the events are replayed on the DR replica database instance.
+    * Post replay, the replication status is looked up again in DR, 
+    * Based on a comparison of the Production transaction id and post replay transaction id at DR, displays success or failure message.
+* All messages are printed both to console and a log file.
+
 # Instructions to run 
 
 1. Update configurations in env.sh
