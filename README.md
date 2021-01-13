@@ -51,7 +51,7 @@ The workflow is as follows:
 3. Ensure target cluster has the database created
 4. If the cluster is kereberized, obtain the kerberos tickets.
 5. Launch the script with the database name as argument. 
-6. Track the script progress in the last file in the logs folder.
+6. Track the script progress in the log filename which is printed in the console for each run.
 7. Upon successfull completion, the updated transaction id at the target database will be displayed.
 
 # Sample run 
