@@ -10,7 +10,7 @@ hive.repl.rootdir=/apps/hive/repl
 hive.repl.cmrootdir=/apps/hive/cmroot
 hive.metastore.transactional.event.listeners=org.apache.hive.hcatalog.listener.DbNotificationListener 
 ```
-The communication paths involved for Replication to work would involve one beeline session that can talk to  zookeeper, HS2 and HDFS services in both clusters.
+Restart the Hiveserver2 instances as prompted. The communication paths involved for Replication to work would involve one beeline session that can talk to  zookeeper, HS2 and HDFS services in both clusters.
 
 For a manual test, we need to do the following:
 1) Create database in Production Hive using beeline
