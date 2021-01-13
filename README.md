@@ -7,7 +7,7 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 
 # Files :
 * `env.sh` : Configure environment variables here before running the script.
-* `hive3-repl.sh` : Main script to invoke. Run as shown later in the doc.
+* `hive3repl.sh` : Main script to invoke. Run as shown later in the doc.
 * `beeline-functions.sh` : Functions that make beeline calls are defined here.
 * `init.sh` : All global variables are initialized here. Do not change anything here.
 * `repl-common.sh` : Some miscellaneous functions for logging etc are defined here.
@@ -40,7 +40,7 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 First time - 
 FULL DUMP 
 ```
-[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest 
+[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3repl.sh repltest 
 2020-12-28 08:28:00.678 Initiating run to replicate repltest to repltest
 2020-12-28 08:28:05.852 No replication id detected at target. Full data dump dump needs to be initiated.
 2020-12-28 08:28:05.857 Database repltest is being synced for the first time. Initiating full dump.
@@ -56,7 +56,7 @@ FULL DUMP
 ```
 INCREMENTAL DUMP 
 ```
-[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3-repl.sh repltest 
+[hive@c4186-node3 Hive_acid_table_replication]$ bash hive3repl.sh repltest 
 2020-12-28 08:29:01.297 Initiating run to replicate repltest to repltest
 2020-12-28 08:29:06.402 Database repltest transaction ID at target is currently |1029|
 2020-12-28 08:29:06.407 Skipping external tables in incremental dump
