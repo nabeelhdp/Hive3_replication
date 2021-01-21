@@ -34,14 +34,22 @@ trap_log_exit() {
     rm ${RUN_DIR}/${script_name}.lock 
   fi
   
-  printmessage "Uploading replication log to HDFS Upload directory."
-  hdfs dfs -put ${repl_log_file} ${hdfs_upload_dir}
-  local retval=$?
-  
-  if [[ ${retval} -eq 0 ]]; then
-    echo "Uploaded replication log to HDFS Upload directory."
+  # Check if upload directory exists in HDFS
+  hdfs dfs -test -d ${hdfs_upload_dir}
+  local dirtest_retval=$?
+  if [[ ${dirtest_retval} -eq 0 ]]; then
+    # if path exists will attempt log upload.TODO: Check perms before upload.
+    printmessage "Uploading replication log to HDFS Upload directory."
+    hdfs dfs -put ${repl_log_file} ${hdfs_upload_dir}
+    local upload_retval=$?
+    if [[ ${upload_retval} -eq 0 ]]; then
+      echo "Uploaded replication log to HDFS Upload directory."
+    else
+      echo "Replication log upload to HDFS Upload directory failed."
+    fi
   else
-    echo "Replication log upload to HDFS Upload directory failed."
+    printmessage "Upload path ${hdfs_upload_dir} does not exist in HDFS. "
+    printmessage "Will skip log upload to HDFS."
   fi
 
 }
