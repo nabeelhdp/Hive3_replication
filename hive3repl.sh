@@ -49,7 +49,7 @@ check_prev_instance_running ${script_name}
 dbname=$1
 
 # location for log file
-repl_log_file="${LOG_DIR}/replication_${current_time}.log"
+repl_log_file="${LOG_DIR}/replication_${dbname}_${current_time}.log"
 
 # Validate dbname provided against list of valid names specified in env.sh
 dbvalidity="0"
