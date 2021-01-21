@@ -43,13 +43,15 @@ fi
 [ -d ${LOG_DIR} ] || mkdir -p ${LOG_DIR} 
 
 script_name=$(basename -- "$0")
-check_prev_instance_running ${script_name}
 
 # first argument is the db name 
 dbname=$1
 
 # location for log file
 repl_log_file="${LOG_DIR}/replication_${dbname}_${current_time}.log"
+
+lock_name=${script_name}_${dbname}.lock
+check_instance_lock ${lock_name}
 
 # Validate dbname provided against list of valid names specified in env.sh
 dbvalidity="0"
