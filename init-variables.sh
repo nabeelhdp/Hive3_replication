@@ -41,6 +41,7 @@ EXT_BOOTSTRAP_HQL="${HQL_DIR}/replextbootstrap.hql"
 LOAD_HQL="${HQL_DIR}/replload.hql"
 EXT_LOAD_HQL="${HQL_DIR}/replextload.hql"
 STATUS_HQL="${HQL_DIR}/replstatus.hql"
+INITREPLCHANGEMANAGER_HQL="${HQL_DIR}/initReplChangeManager.hql"
 
 # beeline options to be passed. Do not change this as the output parsing will break
 # if this is changed.
