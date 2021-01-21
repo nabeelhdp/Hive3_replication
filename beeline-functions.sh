@@ -95,6 +95,7 @@ fi
 
 }
 
+
 replay_dump_at_target(){
 # ----------------------------------------------------------------------------
 # Load database at target from hdfs location in source
@@ -104,16 +105,30 @@ replay_dump_at_target(){
 src_dump_path="${source_hdfs_prefix}${dump_path}"
 local out_file="${TMP_DIR}/repl_load_beeline.out"
 local LOAD_HQL=$1
+local retry_counter=1
+local retval=1
 
-beeline -u ${target_jdbc_url} ${beeline_opts} \
- -n ${beeline_user} \
- --hivevar dbname=${dbname} \
- --hivevar src_dump_path=${src_dump_path} \
- -f ${LOAD_HQL} \
-  >${out_file} \
-  2>>${repl_log_file}
+while [ ${retry_counter} -le $INCR_RERUN ]
+do
+  beeline -u ${target_jdbc_url} ${beeline_opts} \
+    -n ${beeline_user} \
+    --hivevar dbname=${dbname} \
+    --hivevar src_dump_path=${src_dump_path} \
+    -f ${LOAD_HQL} \
+    >${out_file} \
+    2>>${repl_log_file}
 
-local retval=$?
+  retval=$?
+  if [ ${retval} -gt 0 ]
+  then
+    printmessage "Beeline command failed, return code is: ${retval}"
+    printmessage "Number of failed attempts: ${retry_counter}"
+  else
+    break
+  fi
+  retry_counter=$[${retry_counter}+1]
+done
+
 return ${retval}
 
 }
