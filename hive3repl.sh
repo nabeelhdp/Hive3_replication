@@ -28,8 +28,6 @@ source ${THIS_DIR}/init-variables.sh
 source ${THIS_DIR}/misc-functions.sh
 source ${THIS_DIR}/beeline-functions.sh
 
-trap trap_log_int INT TERM
-trap trap_log_exit EXIT 
 
 
 ################ MAIN BEGINS HERE #########################
@@ -52,6 +50,10 @@ repl_log_file="${LOG_DIR}/replication_${dbname}_${current_time}.log"
 
 lock_name=${script_name}_${dbname}.lock
 check_instance_lock ${lock_name}
+
+
+trap { trap_log_int ${lock_name}} INT TERM
+trap { trap_log_exit ${lock_name}} EXIT 
 
 # Validate dbname provided against list of valid names specified in env.sh
 dbvalidity="0"
