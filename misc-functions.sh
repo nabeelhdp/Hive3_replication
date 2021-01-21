@@ -33,6 +33,17 @@ trap_log_exit() {
   if [[$(cat ${RUN_DIR}/${script_name}.lock) == $$]]; then
     rm ${RUN_DIR}/${script_name}.lock 
   fi
+  
+  printmessage "Uploading replication log to HDFS Upload directory."
+  hdfs dfs -put ${repl_log_file} ${hdfs_upload_dir}
+  local retval=$?
+  
+  if [[ ${retval} -eq 0 ]]; then
+    echo "Uploaded replication log to HDFS Upload directory."
+  else
+    echo "Replication log upload to HDFS Upload directory failed."
+  fi
+
 }
 
 check_prev_instance_running() {
