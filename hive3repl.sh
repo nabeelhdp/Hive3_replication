@@ -45,7 +45,7 @@ fi
 script_name=$(basename -- "$0")
 check_prev_instance_running ${script_name}
 
-# If argument count is 1 or 2, the first argument is the db name 
+# first argument is the db name 
 dbname=$1
 
 # Validate dbname provided against list of valid names specified in env.sh
