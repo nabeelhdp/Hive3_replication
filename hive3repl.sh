@@ -20,12 +20,12 @@ source ${THIS_DIR}/env.sh
 # ----------------------------------------------------------------------------
 # Set global variables that should not be changed by user
 #
-source ${THIS_DIR}/init.sh
+source ${THIS_DIR}/init-variables.sh
 
 # ----------------------------------------------------------------------------
 # Source common functions
 #
-source ${THIS_DIR}/repl-common.sh
+source ${THIS_DIR}/misc-functions.sh
 source ${THIS_DIR}/beeline-functions.sh
 
 trap trap_log_int INT TERM
