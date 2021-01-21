@@ -16,7 +16,7 @@ trap_log_int() {
 # Function to identify if a Ctrl-C has been issued against the script run.
 #
   printmessage "Ctrl-C attempted. Aborting!"
-  local lock_file=${RUN_DIR}/$1
+  local lock_file="${RUN_DIR}/$1"
 
   # Removing lock file upon completion of run
   # A second script checking the lock and exiting should not remove the lock
@@ -33,7 +33,7 @@ trap_log_exit() {
 # Retrieve current last_repl_id for database at target after replication
 #
 
-  local lock_file=${RUN_DIR}/$1
+  local lock_file="${RUN_DIR}/$1"
 
   # Removing unnecessary warnings from SLF4J library, 
   sed -i '/^SLF4J:/d' ${repl_log_file}
@@ -74,7 +74,7 @@ check_instance_lock() {
 # Retrieve current last_repl_id for database at target after replication
 #
 
-local lock_file=${RUN_DIR}/$1
+local lock_file="${RUN_DIR}/$1"
 
 ## If the lock file exists
 if [ -e ${lock_file} ]; then
