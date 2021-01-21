@@ -1,6 +1,10 @@
 #!/bin/bash
 
 printmessage() {
+
+# ----------------------------------------------------------------------------
+# Function to add timestamps to messages and write to log file
+#
   local now=`date +%Y-%m-%d\ %H:%M:%S.$(( $(date +%-N) / 1000000 ))`
   local message="$now $*"
   echo -e ${message} | tee -a ${repl_log_file}
@@ -8,18 +12,28 @@ printmessage() {
 
 trap_log_int() {
 
+# ----------------------------------------------------------------------------
+# Function to identify if a Ctrl-C has been issued against the script run.
+#
   printmessage "Ctrl-C attempted. Aborting!"
- 
+  local lock_file=${RUN_DIR}/$1
+
   # Removing lock file upon completion of run
   # A second script checking the lock and exiting should not remove the lock
   # of the first instance which is running. Henc adding a pid check
-  if [[$(cat ${RUN_DIR}/${script_name}.lock) == $$]]; then
-    rm ${RUN_DIR}/${script_name}.lock 
+  if [[$(cat ${lock_file}) == $$]]; then
+    rm  ${lock_file}
   fi
 
 }
 
 trap_log_exit() {
+
+# ----------------------------------------------------------------------------
+# Retrieve current last_repl_id for database at target after replication
+#
+
+  local lock_file=${RUN_DIR}/$1
 
   # Removing unnecessary warnings from SLF4J library, 
   sed -i '/^SLF4J:/d' ${repl_log_file}
@@ -30,8 +44,8 @@ trap_log_exit() {
   # Removing lock file upon completion of run
   # A second script checking the lock and exiting should not remove the lock
   # of the first instance which is running. Henc adding a pid check
-  if [[$(cat ${RUN_DIR}/${script_name}.lock) == $$]]; then
-    rm ${RUN_DIR}/${script_name}.lock 
+  if [[$(cat ${lock_file}) == $$]]; then
+    rm  ${lock_file}
   fi
   
   # Check if upload directory exists in HDFS
@@ -54,25 +68,32 @@ trap_log_exit() {
 
 }
 
-check_prev_instance_running() {
+check_instance_lock() {
+
+# ----------------------------------------------------------------------------
+# Retrieve current last_repl_id for database at target after replication
+#
+
+local lock_file=${RUN_DIR}/$1
 
 ## If the lock file exists
-if [ -e ${RUN_DIR}/${script_name}.lock ]; then
+if [ -e ${lock_file} ]; then
 
     ## Check if the PID in the lockfile is a running instance
     ## of ${script_name} to guard against failed runs
-    if ps $(cat ${RUN_DIR}/${script_name}.lock ) | grep ${script_name} >/dev/null; then
-        printmessage "Script ${script_name} is already running, exiting"
+    if ps $(cat ${lock_file}) | grep ${script_name} >/dev/null; then
+        printmessage "Script ${script_name} is already running for ${dbname}, exiting"
         exit 1
     else
-        printmessage "Lockfile  ${RUN_DIR}/${script_name}.lock contains a stale PID."
-        printmessage "A previous replication run may still be running. Please confirm"
-        printmessage "there's no replication run in progress and remove the lock file to continue."
+        printmessage "Lockfile ${lock_file} contains a stale PID."
+        printmessage "A previous replication run may still be running for ${dbname}."
+        printmessage "Please confirm if the previous process exited, then delete the lock file:"
+        printmessage "${lock_file} before proceeding."
         exit 1
     fi
 fi
 ## Create the lockfile by printing the script's PID into it
-echo $$ > ${RUN_DIR}/${script_name}.lock 
+echo $$ > ${lock_file}
 
 }
 
