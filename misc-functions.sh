@@ -17,6 +17,7 @@ trap_log_int() {
 #
   printmessage "Ctrl-C attempted. Aborting!"
   local lock_file="${RUN_DIR}/$1"
+  local dump_lockfile=${RUN_DIR}/dump.lock
 
   # Removing lock file upon completion of run
   # A second script checking the lock and exiting should not remove the lock
@@ -24,6 +25,13 @@ trap_log_int() {
   if [[$(cat ${lock_file}) == $$]]; then
     rm  ${lock_file}
   fi
+
+  ## If dump lock exists and is created by the current process, 
+  ## remove the lock since dump is now complete
+  if [[$(cat ${dump_lockfile}) == $$]]; then
+    rm  ${dump_lockfile}
+  fi
+
 
 }
 
@@ -46,6 +54,14 @@ trap_log_exit() {
   # of the first instance which is running. Henc adding a pid check
   if [[$(cat ${lock_file}) == $$]]; then
     rm  ${lock_file}
+  fi
+
+  ## Remove dump lock file if aborted halfway
+  local dump_lockfile=${RUN_DIR}/dump.lock
+  ## If dump lock exists and is created by the current process, 
+  ## remove the lock since dump is now complete
+  if [[$(cat ${dump_lockfile}) == $$]]; then
+    rm  ${dump_lockfile}
   fi
   
   # Check if upload directory exists in HDFS
