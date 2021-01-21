@@ -56,12 +56,30 @@ then
     2>>${repl_log_file}
 fi
 
+## Two bootstrap dumps should not run together. Hence adding a lock here.
+local dump_lockfile=${RUN_DIR}/dump.lock
+
+## Check if any bootstrap dump is running. If so exit.
+if [ -e ${dump_lockfile} ]; then
+  printmessage "Boostrap dump in progress by pid another database, exiting"
+  exit 1
+else
+  ## Create the lockfile by printing the script's PID into it  and proceed
+  echo $$ > ${dump_lockfile}
+fi
+
 beeline -u ${source_jdbc_url} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${dbname} \
  -f ${HQL_FILE} \
  > ${out_file} \
  2>>${repl_log_file}
+
+## If dump lock exists and is created by the current process, 
+## remove the lock since dump is now complete
+if [[$(cat ${dump_lockfile}) == $$]]; then
+  rm  ${dump_lockfile}
+fi
 
 # Extract dump path and transaction id from the output
 dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
