@@ -46,13 +46,12 @@ if [[ ${initReplChangeManager} == "true" ]]
 then 
   # Apply workaroud for the issue in this page (HDP 3.1.4)
   # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
-  local WORKAROUND_HQL="${HQL_DIR}/initReplChangeManager.hql"
   local initReplChangeManager_out_file="${TMP_DIR}/initReplChangeManager.out"
 
   beeline -u ${source_jdbc_url} ${beeline_opts} \
     -n ${beeline_user} \
     --hivevar dbname=${dbname} \
-    -f ${HQL_FILE} \
+    -f ${INITREPLCHANGEMANAGER_HQL} \
     > ${initReplChangeManager_out_file} \
     2>>${repl_log_file}
 fi
