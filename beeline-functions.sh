@@ -110,6 +110,12 @@ local retval=1
 
 while [ ${retry_counter} -le $INCR_RERUN ]
 do
+
+  if [ ${retry_counter} -gt 1 ]
+  then
+      printmessage "Retrying load. Attempt number: ${retry_counter}"
+  fi
+  
   beeline -u ${target_jdbc_url} ${beeline_opts} \
     -n ${beeline_user} \
     --hivevar dbname=${dbname} \
@@ -121,7 +127,7 @@ do
   retval=$?
   if [ ${retval} -gt 0 ]
   then
-    printmessage "Beeline command failed, return code is: ${retval}"
+    printmessage "REPL Load failed, return code is: ${retval}"
     printmessage "Number of failed attempts: ${retry_counter}"
   else
     break
