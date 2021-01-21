@@ -24,4 +24,5 @@ beeline_user="hive"
 INCR_RERUN=3
 
 # HDFS Location for log file  upload at end of replication run.
-hdfs_upload_dir=/tmp/
+# Create this folder before configuring it here.
+hdfs_upload_dir=/tmp/replication-logs
