@@ -22,3 +22,6 @@ beeline_user="hive"
 
 # Number of attempts to retry a failed incremental repl load
 INCR_RERUN=3
+
+# HDFS Location for log file  upload at end of replication run.
+hdfs_upload_dir=/tmp/
