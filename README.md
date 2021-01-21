@@ -9,8 +9,8 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 * `env.sh` : Configure environment variables here before running the script.
 * `hive3repl.sh` : Main script to invoke. Run as shown later in the doc.
 * `beeline-functions.sh` : Functions that make beeline calls are defined here.
-* `init.sh` : All global variables are initialized here. Do not change anything here.
-* `repl-common.sh` : Some miscellaneous functions for logging etc are defined here.
+* `init-variables.sh` : All global variables are initialized here. Do not change anything here.
+* `misc-functions.sh` : Some miscellaneous functions for logging etc are defined here.
 
 # Configs
 | Parameter | Description |
