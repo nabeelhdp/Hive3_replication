@@ -40,6 +40,7 @@ The workflow is as follows:
 * If an existing version of database exists in DR, it connects to Production Hive instance and passes the last replicated id in DR to production 
     * The production Hive instance then generates an incremental dump of the database and returns an HDFS path of the dump and the latest transaction id at Production.
     * Once the production dump is generated, it connects back to the DR hive instance and the events are replayed on the DR replica database instance.
+    * If the replay fails, retry upto ${INCR_RERUN} times.
     * Post replay, the replication status is looked up again in DR, 
     * Based on a comparison of the Production transaction id and post replay transaction id at DR, displays success or failure message.
 * All messages are printed both to console and a log file.
