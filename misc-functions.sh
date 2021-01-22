@@ -79,8 +79,8 @@ trap_log_exit() {
   duration=$SECONDS
   printmessage "Script run took $(($duration / 60)) minutes and $(($duration % 60)) seconds "
 
-  if [[ ${HDFS_UPLOAD} == 'true' ]]; then
-    if [[ ${hdfs_upload_dir} != ""]]; then
+  if [[${HDFS_UPLOAD} == 'true']]; then
+    if [[${hdfs_upload_dir} != ""]]; then
       upload_logs_to_hdfs
     else
       printmessage "No path specified for HDFS upload."
@@ -98,7 +98,7 @@ upload_logs_to_hdfs() {
   if [[ ${dirtest_retval} -eq 0 ]]; then
     # if path exists will attempt log upload.TODO: Check perms before upload.
     printmessage "Uploading replication log to HDFS Upload directory."
-    hdfs dfs -put ${repl_log_file} ${hdfs_upload_dir}
+    hdfs dfs -put ${repl_log_file} ${hdfs_upload_dir} 2>&1
     local upload_retval=$?
     if [[ ${upload_retval} -eq 0 ]]; then
       echo "Uploaded replication log to HDFS Upload directory."
@@ -119,10 +119,8 @@ check_instance_lock() {
 #
 
 local lock_file="${RUN_DIR}/$1"
-
 ## If the lock file exists
 if [ -e ${lock_file} ]; then
-
     ## Check if the PID in the lockfile is a running instance
     ## of ${script_name} to guard against failed runs
     if ps $(cat ${lock_file}) | grep ${script_name} >/dev/null; then
@@ -130,7 +128,7 @@ if [ -e ${lock_file} ]; then
         exit 1
     else
         printmessage "Lockfile ${lock_file} contains a stale PID."
-        printmessage "A previous replication run may still be running for ${dbname}."
+        printmessage "A previous replication run for ${dbname} may have failed halfway."
         printmessage "Please confirm if the previous process exited, then delete the lock file:"
         printmessage "${lock_file} before proceeding."
         exit 1
