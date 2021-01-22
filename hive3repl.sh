@@ -9,6 +9,7 @@
 # Email       : nmoidu@cloudera.com
 ###################################################################
 
+# Add seconds inbuilt bash counter to track time of run.
 SECONDS=0
 
 # Directory where script runs from
@@ -31,10 +32,9 @@ source ${THIS_DIR}/misc-functions.sh
 source ${THIS_DIR}/beeline-functions.sh
 
 
-
 ################ MAIN BEGINS HERE #########################
 
-# Argument count should be 1, the dbname
+# Argument count should only be 1, and that should be the dbname
 if [[ "$#" -ne 1 ]]; then
   script_usage
 fi
@@ -48,8 +48,12 @@ script_name=$(basename -- "$0")
 dbname=$1
 
 # location for log file
+# This was moved from init-variables.sh here because dbname is set here
 repl_log_file="${LOG_DIR}/replication_${dbname}_${current_time}.log"
 
+# Optional db level lock to avoid overlapping runs for same database.
+# Defaults to false, i.e. no locking in place. 
+# Use flock when invoking script as an alternative if needed.
 if [[ ${APPLY_DB_LOCK} == 'true' ]]
 then
   lock_name=${script_name}_${dbname}.lock
