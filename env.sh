@@ -23,6 +23,12 @@ beeline_user="hive"
 # Number of attempts to retry a failed incremental repl load
 INCR_RERUN=3
 
+# Flag to apply workaround for HDP 3.1.4 for this error
+# https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
+initReplChangeManager=true  # [true|false]
+
+# The features below are not tested thoroughly, so enable only if you can fix subsequent errors
+# Default for all these  is set to false accordingly.
 APPLY_DB_LOCK=false # [true|false]
 # HDFS Location for log file  upload at end of replication run.
 # Enable this flag to upload
@@ -30,6 +36,3 @@ HDFS_UPLOAD=false  # [true|false]
 # Create this folder before configuring it here.
 hdfs_upload_dir=
 
-# Flag to apply workaround for HDP 3.1.4 for this error
-# https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
-initReplChangeManager=true  # [true|false]
