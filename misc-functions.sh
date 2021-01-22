@@ -31,7 +31,8 @@ trap_log_int() {
   if [[$(cat ${dump_lockfile}) == $$]]; then
     rm  ${dump_lockfile}
   fi
-
+  
+  printmessage "Lock files removed"
 
 }
 
@@ -64,6 +65,14 @@ trap_log_exit() {
     rm  ${dump_lockfile}
   fi
   
+  printmessage "Lock files removed"
+  duration=$SECONDS
+  printmessage "Script run took $(($duration / 60)) minutes and $(($duration % 60)) seconds "
+
+}
+
+upload_logs_to_hdfs() {
+
   # Check if upload directory exists in HDFS
   hdfs dfs -test -d ${hdfs_upload_dir}
   local dirtest_retval=$?
