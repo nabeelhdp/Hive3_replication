@@ -69,6 +69,17 @@ trap_log_exit() {
   duration=$SECONDS
   printmessage "Script run took $(($duration / 60)) minutes and $(($duration % 60)) seconds "
 
+  if [[ ${HDFS_UPLOAD} == 'true' ]]
+  then
+    if [[ ${hdfs_upload_dir} != ""]]
+    then
+      upload_logs_to_hdfs
+    else
+      printmessage "No path specified for HDFS upload."
+      printmessage "Will skip log upload to HDFS."
+    fi
+  fi
+  
 }
 
 upload_logs_to_hdfs() {
