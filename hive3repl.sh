@@ -131,7 +131,10 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       elif [[ ${post_load_repl_id} == "NULL" ]] ; then
         printmessage "Database replication FAILED. No transactions have been applied in this run."
         # TODO - cleanup directories leftover during failed replication (if any) 
-      else
+      elif [ ${post_load_repl_id} -gt ${source_latest_txid} ] ; then
+        printmessage "Transaction event ID in target is ahead of the event ID at source at time of current dump."
+        printmessage "This may happen if there is another REPL LOAD in progress with a later copy of the source dump"
+     else
         printmessage "Unable to verify database replication! Post Load repl id: |${post_load_repl_id}|"
         printmessage "Source repl id: |${source_latest_txid}|"    
         exit 1
@@ -191,7 +194,9 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
       elif [[ ${post_load_repl_id} == ${last_repl_id} ]] ; then
         printmessage "Database replication FAILED. No transactions have been applied in this run."
-        # TODO - cleanup directories leftover during failed replication (if any) 
+      elif [ ${post_load_repl_id} -gt ${source_latest_txid} ] ; then
+        printmessage "Transaction event ID in target is ahead of the event ID at source at time of current dump."
+        printmessage "This may happen if there is another REPL LOAD in progress with a later copy of the source dump"
       else
         printmessage "Unable to verify database replication! Post Load repl id: |${post_load_repl_id}|"
         printmessage "Source repl id: |${source_latest_txid}|"    
