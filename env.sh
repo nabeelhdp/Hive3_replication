@@ -27,7 +27,7 @@ INCR_RERUN=3
 # Enable this flag to upload
 HDFS_UPLOAD=false  # [true|false]
 # Create this folder before configuring it here.
-hdfs_upload_dir=/tmp/replication-logs
+hdfs_upload_dir=
 
 # Flag to apply workaround for HDP 3.1.4 for this error
 # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
