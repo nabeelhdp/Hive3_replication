@@ -9,6 +9,8 @@
 # Email       : nmoidu@cloudera.com
 ###################################################################
 
+SECONDS=0
+
 # Directory where script runs from
 THIS_DIR=$(dirname "$0")
 
