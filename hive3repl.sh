@@ -119,8 +119,10 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       HQL_FILE=${LOAD_HQL}
     fi 
     
-    # Now the source cluster has generated a dump of the database. 
-    # Replay the dump on the target cluster database.
+    # Override the variable INCR_RERUN and set it to 1 to disable retries for bootstrap load. 
+    INCR_RERUN=1
+    # Now the source cluster has generated a full dump of the database. 
+    # Replay the full dump on the target cluster database.
     if replay_dump_at_target ${HQL_FILE}; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
