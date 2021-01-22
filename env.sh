@@ -23,6 +23,7 @@ beeline_user="hive"
 # Number of attempts to retry a failed incremental repl load
 INCR_RERUN=3
 
+APPLY_DB_LOCK=false # [true|false]
 # HDFS Location for log file  upload at end of replication run.
 # Enable this flag to upload
 HDFS_UPLOAD=false  # [true|false]
