@@ -50,9 +50,11 @@ dbname=$1
 # location for log file
 repl_log_file="${LOG_DIR}/replication_${dbname}_${current_time}.log"
 
-lock_name=${script_name}_${dbname}.lock
-check_instance_lock ${lock_name}
-
+if [[ ${APPLY_DB_LOCK} == 'true' ]]
+then
+  lock_name=${script_name}_${dbname}.lock
+  check_instance_lock ${lock_name}
+fi
 
 trap { trap_log_int ${lock_name}} INT TERM
 trap { trap_log_exit ${lock_name}} EXIT 
