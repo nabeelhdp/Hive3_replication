@@ -27,7 +27,9 @@ INCR_RERUN=3
 # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
 initReplChangeManager=true  # [true|false]
 
+##################################
 # The features below are not tested thoroughly, so enable only if you can fix subsequent errors
+##################################
 # Default for all these  is set to false accordingly.
 APPLY_DB_LOCK=false # [true|false]
 # HDFS Location for log file  upload at end of replication run.
