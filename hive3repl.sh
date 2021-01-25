@@ -49,7 +49,7 @@ DBNAME=$1
 
 # location for log file
 # This was moved from init-variables.sh here because DBNAME is set here
-repl_log_file="${LOG_DIR}/replication_${DBNAME}_${CURRENT_TIME}.log"
+REPL_LOG_FILE="${LOG_DIR}/replication_${DBNAME}_${CURRENT_TIME}.log"
 
 # Optional db level lock to avoid overlapping runs for same database.
 # Defaults to false, i.e. no locking in place. 
@@ -63,10 +63,10 @@ fi
 trap { trap_log_int ${lock_name}} INT TERM
 trap { trap_log_exit ${lock_name}} EXIT 
 
-echo "===================================================================" >>${repl_log_file}
+echo "===================================================================" >>${REPL_LOG_FILE}
 printmessage "Initiating run to replicate ${DBNAME} to ${DBNAME}."
-echo "==================================================================="  >>${repl_log_file}
-echo " For detailed logging, run tail -f on ${repl_log_file}"
+echo "==================================================================="  >>${REPL_LOG_FILE}
+echo " For detailed logging, run tail -f on ${REPL_LOG_FILE}"
 
 # Retrieve the current state of replication in the target cluster.
 retrieve_current_target_repl_id
@@ -128,7 +128,7 @@ if [[ ${last_repl_id} == "NULL" ]]; then
       fi
     else 
       printmessage "Data load at target cluster failed" 
-      echo -e "See ${repl_log_file} for details. Exiting!" 
+      echo -e "See ${REPL_LOG_FILE} for details. Exiting!" 
       exit 1
     fi 
         
