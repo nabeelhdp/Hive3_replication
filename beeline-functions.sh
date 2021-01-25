@@ -6,7 +6,7 @@ retrieve_current_target_repl_id() {
 # Retrieve current last_repl_id for database at target before replication
 #
 local OUT_FILE="${TMP_DIR}/repl_status_beeline.out"
-beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
+beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
@@ -23,7 +23,7 @@ retrieve_post_load_target_repl_id() {
 # Retrieve current last_repl_id for database at target after replication
 #
 local OUT_FILE="${TMP_DIR}/post_load_repl_status_beeline.out"
-beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
+beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
@@ -48,7 +48,7 @@ then
   # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
   local initReplChangeManager_out_file="${TMP_DIR}/initReplChangeManager.out"
 
-  beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
+  beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
     -f ${INITREPLCHANGEMANAGER_HQL} \
@@ -68,7 +68,7 @@ else
   echo $$ > ${dump_lockfile}
 fi
 
-beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
+beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${HQL_FILE} \
@@ -102,7 +102,7 @@ gen_incremental_dump_source() {
 #
 local HQL_FILE=$1
 local OUT_FILE="${TMP_DIR}/repl_incdump_beeline.out"
-beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
+beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  --hivevar last_repl_id=${last_repl_id} \
@@ -149,7 +149,7 @@ do
       printmessage "Retrying load. Attempt number: ${retry_counter}"
   fi
   
-  beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
+  beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
     --hivevar src_dump_path=${SOURCE_DUMP_PATH} \
