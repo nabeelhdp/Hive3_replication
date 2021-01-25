@@ -80,7 +80,7 @@ trap_log_exit() {
   printmessage "Script run took $(($duration / 60)) minutes and $(($duration % 60)) seconds "
 
   if [[${HDFS_UPLOAD} == 'true']]; then
-    if [[${hdfs_upload_dir} != ""]]; then
+    if [[${HDFS_UPLOAD_DIR} != ""]]; then
       upload_logs_to_hdfs
     else
       printmessage "No path specified for HDFS upload."
@@ -93,12 +93,12 @@ trap_log_exit() {
 upload_logs_to_hdfs() {
 
   # Check if upload directory exists in HDFS
-  hdfs dfs -test -d ${hdfs_upload_dir}
+  hdfs dfs -test -d ${HDFS_UPLOAD_DIR}
   local dirtest_retval=$?
   if [[ ${dirtest_retval} -eq 0 ]]; then
     # if path exists will attempt log upload.TODO: Check perms before upload.
     printmessage "Uploading replication log to HDFS Upload directory."
-    hdfs dfs -put ${repl_log_file} ${hdfs_upload_dir} 2>&1
+    hdfs dfs -put ${repl_log_file} ${HDFS_UPLOAD_DIR} 2>&1
     local upload_retval=$?
     if [[ ${upload_retval} -eq 0 ]]; then
       echo "Uploaded replication log to HDFS Upload directory."
@@ -106,7 +106,7 @@ upload_logs_to_hdfs() {
       echo "Replication log upload to HDFS Upload directory failed."
     fi
   else
-    printmessage "Upload path ${hdfs_upload_dir} does not exist in HDFS. "
+    printmessage "Upload path ${HDFS_UPLOAD_DIR} does not exist in HDFS. "
     printmessage "Will skip log upload to HDFS."
   fi
 
