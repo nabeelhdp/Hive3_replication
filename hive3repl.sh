@@ -63,19 +63,6 @@ fi
 trap { trap_log_int ${lock_name}} INT TERM
 trap { trap_log_exit ${lock_name}} EXIT 
 
-# Validate DBNAME provided against list of valid names specified in env.sh
-dbvalidity="0"
-for val in ${dblist}; do
-    if [[ ${val} == ${DBNAME} ]]; then
-      dbvalidity="1"
-    fi
-done
-
-if [[ ${dbvalidity} == "0" ]]; then
-  printmessage "Invalid target database name specified. Exiting!"
-  exit 1
-fi
-
 echo "===================================================================" >>${repl_log_file}
 printmessage "Initiating run to replicate ${DBNAME} to ${DBNAME}."
 echo "==================================================================="  >>${repl_log_file}
