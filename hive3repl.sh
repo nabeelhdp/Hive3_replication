@@ -92,7 +92,7 @@ if [[ ${last_repl_id} == "NULL" ]]; then
 
   # If dump is generated successfully, a proper integer value is returned.
   if [[ ${source_latest_txid} > 0 ]]; then
-    printmessage "Database ${DBNAME} full dump has been generated at |${source_hdfs_prefix}${dump_path}|."
+    printmessage "Database ${DBNAME} full dump has been generated at |${SOURCE_HDFS_PREFIX}${dump_path}|."
     printmessage "The current transaction ID at source is |${source_latest_txid}|"
     printmessage "There are ${source_latest_txid} transactions to be synced in this run."
     printmessage "Initiating data load at target cluster on database ${DBNAME}."
@@ -158,7 +158,7 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "The current transaction ID at source is |${source_latest_txid}|"
 
   if [[ ${source_latest_txid} > 0 ]]; then
-    printmessage "Database ${DBNAME} incremental dump has been generated at |${source_hdfs_prefix}${dump_path}|."
+    printmessage "Database ${DBNAME} incremental dump has been generated at |${SOURCE_HDFS_PREFIX}${dump_path}|."
     # the calculation of txn_count below doesn't match with numEvents that show up in the 
     #txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "Initiating REPL LOAD at destination cluster to replicate ${DBNAME} to transaction id |${source_latest_txid}|."
