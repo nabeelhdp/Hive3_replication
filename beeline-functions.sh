@@ -6,7 +6,7 @@ retrieve_current_target_repl_id() {
 # Retrieve current last_repl_id for database at target before replication
 #
 local out_file="${TMP_DIR}/repl_status_beeline.out"
-beeline -u ${target_jdbc_url} ${beeline_opts} \
+beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
@@ -23,7 +23,7 @@ retrieve_post_load_target_repl_id() {
 # Retrieve current last_repl_id for database at target after replication
 #
 local out_file="${TMP_DIR}/post_load_repl_status_beeline.out"
-beeline -u ${target_jdbc_url} ${beeline_opts} \
+beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
@@ -48,7 +48,7 @@ then
   # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
   local initReplChangeManager_out_file="${TMP_DIR}/initReplChangeManager.out"
 
-  beeline -u ${source_jdbc_url} ${beeline_opts} \
+  beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
     -n ${beeline_user} \
     --hivevar dbname=${DBNAME} \
     -f ${INITREPLCHANGEMANAGER_HQL} \
@@ -68,7 +68,7 @@ else
   echo $$ > ${dump_lockfile}
 fi
 
-beeline -u ${source_jdbc_url} ${beeline_opts} \
+beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${DBNAME} \
  -f ${HQL_FILE} \
@@ -88,7 +88,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
 
-if [[ ${dump_path} != ${repl_root}* ]]; then
+if [[ ${dump_path} != ${REPL_ROOT}* ]]; then
   printmessage "Could not generate database dump for ${DBNAME} at source.\n"
   return 0
 else
@@ -102,7 +102,7 @@ gen_incremental_dump_source() {
 #
 local HQL_FILE=$1
 local out_file="${TMP_DIR}/repl_incdump_beeline.out"
-beeline -u ${source_jdbc_url} ${beeline_opts} \
+beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
  -n ${beeline_user} \
  --hivevar dbname=${DBNAME} \
  --hivevar last_repl_id=${last_repl_id} \
@@ -135,7 +135,7 @@ replay_dump_at_target(){
 #
 
 # Add prefix for source cluster to dump directory when running at target cluster
-src_dump_path="${source_hdfs_prefix}${dump_path}"
+src_dump_path="${SOURCE_HDFS_PREFIX}${dump_path}"
 local out_file="${TMP_DIR}/repl_load_beeline.out"
 local LOAD_HQL=$1
 local retry_counter=1
@@ -149,7 +149,7 @@ do
       printmessage "Retrying load. Attempt number: ${retry_counter}"
   fi
   
-  beeline -u ${target_jdbc_url} ${beeline_opts} \
+  beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
     -n ${beeline_user} \
     --hivevar dbname=${DBNAME} \
     --hivevar src_dump_path=${src_dump_path} \
