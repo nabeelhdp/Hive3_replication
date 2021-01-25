@@ -22,7 +22,7 @@ INCR_RERUN=3
 
 # Flag to apply workaround in HDP 3.1.4 for this error
 # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
-initReplChangeManager=true  # [true|false]
+INIT_REPL_CHANGE_MANAGER=true  # [true|false]
 
 ##################################
 # The features below are not tested thoroughly, so enable only if you can fix subsequent errors
