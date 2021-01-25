@@ -17,7 +17,6 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 | ----------- | ----------- |
 | target_jdbc_url      | JDBC URL for target cluster. Copy this value from the Ambari UI.       |
 | source_jdbc_url   |  JDBC URL for source cluster. Copy this value from the Ambari UI.        |
-| dblist      | # List of acceptable dbnames when passed via argument to script. This is for a sanity check to avoid accidental full dump generation in prod for mistyped target database names.       |
 |include_external_tables|true/false|
 |repl_root|location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix |
 |source_hdfs_prefix|Prefix to access HDFS locations at source cluster as accessed from target. Can use the Namenode IP:port or cluster nameservice id. Eg. `hdfs://c2186-node2.coelab.cloudera.com:8020` or `hdfs://c2186`"|
