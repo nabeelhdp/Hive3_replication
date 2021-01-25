@@ -43,6 +43,6 @@ EXT_LOAD_HQL="${HQL_DIR}/replextload.hql"
 STATUS_HQL="${HQL_DIR}/replstatus.hql"
 INITREPLCHANGEMANAGER_HQL="${HQL_DIR}/initReplChangeManager.hql"
 
-# beeline options to be passed. Do not change this as the output parsing will break
-# if this is changed.
-beeline_opts="--verbose=true --showHeader=true --silent=false"
+# Beeline options to be passed set as READ ONLY var.
+# Do not change this as the output parsing will break if this is changed.
+readonly BEELINE_OPTS="--verbose=true --showHeader=true --silent=false"
