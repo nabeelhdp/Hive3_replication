@@ -41,7 +41,7 @@ EXT_BOOTSTRAP_HQL="${HQL_DIR}/replextbootstrap.hql"
 LOAD_HQL="${HQL_DIR}/replload.hql"
 EXT_LOAD_HQL="${HQL_DIR}/replextload.hql"
 STATUS_HQL="${HQL_DIR}/replstatus.hql"
-INITREPLCHANGEMANAGER_HQL="${HQL_DIR}/initReplChangeManager.hql"
+INIT_REPL_CHANGE_MANAGER_HQL="${HQL_DIR}/initReplChangeManager.hql"
 
 # Beeline options to be passed set as READ ONLY var.
 # Do not change this as the output parsing will break if this is changed.
