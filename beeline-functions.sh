@@ -42,17 +42,17 @@ gen_bootstrap_dump_source() {
 local HQL_FILE=$1
 local OUT_FILE="${TMP_DIR}/repl_fulldump_beeline.out"
 
-if [[ ${initReplChangeManager} == "true" ]]
+if [[ ${INIT_REPL_CHANGE_MANAGER} == "true" ]]
 then 
   # Apply workaroud for the issue in this page (HDP 3.1.4)
   # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
-  local initReplChangeManager_out_file="${TMP_DIR}/initReplChangeManager.out"
+  local INIT_REPL_CHANGE_MANAGER_OUT_FILE="${TMP_DIR}/initReplChangeManager.out"
 
   beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
     -f ${INITREPLCHANGEMANAGER_HQL} \
-    > ${initReplChangeManager_out_file} \
+    > ${INIT_REPL_CHANGE_MANAGER_OUT_FILE} \
     2>>${REPL_LOG_FILE}
 fi
 
