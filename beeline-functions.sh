@@ -11,7 +11,7 @@ beeline -u ${target_jdbc_url} ${beeline_opts} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
  >${out_file} \
- 2>>${repl_log_file}
+ 2>>${REPL_LOG_FILE}
 
 last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 
@@ -28,7 +28,7 @@ beeline -u ${target_jdbc_url} ${beeline_opts} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
  > ${out_file} \
- 2>>${repl_log_file} 
+ 2>>${REPL_LOG_FILE} 
  
 post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 
@@ -53,7 +53,7 @@ then
     --hivevar dbname=${DBNAME} \
     -f ${INITREPLCHANGEMANAGER_HQL} \
     > ${initReplChangeManager_out_file} \
-    2>>${repl_log_file}
+    2>>${REPL_LOG_FILE}
 fi
 
 ## Two bootstrap dumps should not run together. Hence adding a lock here.
@@ -73,7 +73,7 @@ beeline -u ${source_jdbc_url} ${beeline_opts} \
  --hivevar dbname=${DBNAME} \
  -f ${HQL_FILE} \
  > ${out_file} \
- 2>>${repl_log_file}
+ 2>>${REPL_LOG_FILE}
 
 ## If dump lock exists and is created by the current process, 
 ## remove the lock since dump is now complete
@@ -108,7 +108,7 @@ beeline -u ${source_jdbc_url} ${beeline_opts} \
  --hivevar last_repl_id=${last_repl_id} \
  -f ${HQL_FILE} \
  > ${out_file} \
- 2>>${repl_log_file}
+ 2>>${REPL_LOG_FILE}
 
 
 # Extract dump path and transaction id from the output
@@ -155,7 +155,7 @@ do
     --hivevar src_dump_path=${src_dump_path} \
     -f ${LOAD_HQL} \
     >${out_file} \
-    2>>${repl_log_file}
+    2>>${REPL_LOG_FILE}
 
   retval=$?
   if [ ${retval} -gt 0 ]
