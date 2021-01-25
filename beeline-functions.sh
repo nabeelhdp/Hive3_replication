@@ -5,15 +5,15 @@ retrieve_current_target_repl_id() {
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target before replication
 #
-local out_file="${TMP_DIR}/repl_status_beeline.out"
+local OUT_FILE="${TMP_DIR}/repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
- >${out_file} \
+ >${OUT_FILE} \
  2>>${REPL_LOG_FILE}
 
-last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
+last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE} )
 
 }
 
@@ -22,15 +22,15 @@ retrieve_post_load_target_repl_id() {
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target after replication
 #
-local out_file="${TMP_DIR}/post_load_repl_status_beeline.out"
+local OUT_FILE="${TMP_DIR}/post_load_repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
- > ${out_file} \
+ > ${OUT_FILE} \
  2>>${REPL_LOG_FILE} 
  
-post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
+post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE} )
 
 }
 
@@ -40,7 +40,7 @@ gen_bootstrap_dump_source() {
 # dump entire database at source hive instance for first time
 #
 local HQL_FILE=$1
-local out_file="${TMP_DIR}/repl_fulldump_beeline.out"
+local OUT_FILE="${TMP_DIR}/repl_fulldump_beeline.out"
 
 if [[ ${initReplChangeManager} == "true" ]]
 then 
@@ -72,7 +72,7 @@ beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${HQL_FILE} \
- > ${out_file} \
+ > ${OUT_FILE} \
  2>>${REPL_LOG_FILE}
 
 ## If dump lock exists and is created by the current process, 
@@ -82,8 +82,8 @@ if [[$(cat ${dump_lockfile}) == $$]]; then
 fi
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
+dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE})
+dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
@@ -101,19 +101,19 @@ gen_incremental_dump_source() {
 # dump database at source hive instance from the last_repl_id at target
 #
 local HQL_FILE=$1
-local out_file="${TMP_DIR}/repl_incdump_beeline.out"
+local OUT_FILE="${TMP_DIR}/repl_incdump_beeline.out"
 beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  --hivevar last_repl_id=${last_repl_id} \
  -f ${HQL_FILE} \
- > ${out_file} \
+ > ${OUT_FILE} \
  2>>${REPL_LOG_FILE}
 
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
+dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE})
+dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
@@ -135,8 +135,8 @@ replay_dump_at_target(){
 #
 
 # Add prefix for source cluster to dump directory when running at target cluster
-src_dump_path="${SOURCE_HDFS_PREFIX}${dump_path}"
-local out_file="${TMP_DIR}/repl_load_beeline.out"
+SOURCE_DUMP_PATH="${SOURCE_HDFS_PREFIX}${dump_path}"
+local OUT_FILE="${TMP_DIR}/repl_load_beeline.out"
 local LOAD_HQL=$1
 local retry_counter=1
 local retval=1
@@ -152,9 +152,9 @@ do
   beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
-    --hivevar src_dump_path=${src_dump_path} \
+    --hivevar src_dump_path=${SOURCE_DUMP_PATH} \
     -f ${LOAD_HQL} \
-    >${out_file} \
+    >${OUT_FILE} \
     2>>${REPL_LOG_FILE}
 
   retval=$?
