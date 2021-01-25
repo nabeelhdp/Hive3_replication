@@ -122,13 +122,13 @@ local lock_file="${RUN_DIR}/$1"
 ## If the lock file exists
 if [ -e ${lock_file} ]; then
     ## Check if the PID in the lockfile is a running instance
-    ## of ${script_name} to guard against failed runs
-    if ps $(cat ${lock_file}) | grep ${script_name} >/dev/null; then
-        printmessage "Script ${script_name} is already running for ${dbname}, exiting"
+    ## of ${SCRIPT_NAME} to guard against failed runs
+    if ps $(cat ${lock_file}) | grep ${SCRIPT_NAME} >/dev/null; then
+        printmessage "Script ${SCRIPT_NAME} is already running for ${DBNAME}, exiting"
         exit 1
     else
         printmessage "Lockfile ${lock_file} contains a stale PID."
-        printmessage "A previous replication run for ${dbname} may have failed halfway."
+        printmessage "A previous replication run for ${DBNAME} may have failed halfway."
         printmessage "Please confirm if the previous process exited, then delete the lock file:"
         printmessage "${lock_file} before proceeding."
         exit 1
