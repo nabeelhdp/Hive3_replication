@@ -49,7 +49,7 @@ DBNAME=$1
 
 # location for log file
 # This was moved from init-variables.sh here because DBNAME is set here
-repl_log_file="${LOG_DIR}/replication_${DBNAME}_${current_time}.log"
+repl_log_file="${LOG_DIR}/replication_${DBNAME}_${CURRENT_TIME}.log"
 
 # Optional db level lock to avoid overlapping runs for same database.
 # Defaults to false, i.e. no locking in place. 
