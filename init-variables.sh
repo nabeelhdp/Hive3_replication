@@ -16,7 +16,7 @@ re='^[0-9]+$'
 
 
 # Set unique value for logs and output directory based on time of script run
-current_time=$(date +"%Y_%m_%d_%I_%M_%p")
+CURRENT_TIME=$(date +"%Y_%m_%d_%I_%M_%p")
 
 # Directory where script runs from
 THIS_DIR=$(dirname "$0")
@@ -25,7 +25,7 @@ THIS_DIR=$(dirname "$0")
 LOG_DIR="${THIS_DIR}/logs"
 
 # Location to place outputs of individual beeline commands run during replication
-TMP_DIR="${THIS_DIR}/tmp/run_${current_time}"
+TMP_DIR="${THIS_DIR}/tmp/run_${CURRENT_TIME}"
 
 # Folder containing HiveQL scripts
 HQL_DIR="${THIS_DIR}/HQL"
