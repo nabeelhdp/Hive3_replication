@@ -15,7 +15,7 @@ REPL_ROOT="/apps/hive/repl"
 SOURCE_HDFS_PREFIX="hdfs://c2186-node2.coelab.cloudera.com:8020"
 
 # User running beeline. In kerberized environments this may be ignored.
-beeline_user="hive"
+BEELINE_USER="hive"
 
 # Number of attempts to retry a failed incremental repl load
 INCR_RERUN=3
