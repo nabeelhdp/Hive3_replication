@@ -89,7 +89,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 # begins with configured location for replication dump.
 
 if [[ ${dump_path} != ${repl_root}* ]]; then
-  printmessage "Could not generate database dump for ${dbname} at source.\n"
+  printmessage "Could not generate database dump for ${DBNAME} at source.\n"
   return 0
 else
   return 1
@@ -120,7 +120,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 if [[ ${dump_path} != ${repl_root}* ]]
  then
-  printmessage "Could not generate database dump for ${dbname} at source.\n"
+  printmessage "Could not generate database dump for ${DBNAME} at source.\n"
   return 0
 else
   return 1
