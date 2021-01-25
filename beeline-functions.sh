@@ -51,7 +51,7 @@ then
   beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
-    -f ${INITREPLCHANGEMANAGER_HQL} \
+    -f ${INIT_REPL_CHANGE_MANAGER_HQL} \
     > ${INIT_REPL_CHANGE_MANAGER_OUT_FILE} \
     2>>${REPL_LOG_FILE}
 fi
