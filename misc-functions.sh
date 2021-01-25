@@ -5,7 +5,7 @@ printmessage() {
 # ----------------------------------------------------------------------------
 # Function to add timestamps to messages and write to log file
 #
-  local now=`date +%Y-%m-%d\ %H:%M:%S.$(( $(date +%-N) / 1000000 ))`
+  local now=$(date +%Y-%m-%d\ %H:%M:%S.$(( $(date +%-N) / 1000000 )))
   local message="$now $*"
   echo -e ${message} | tee -a ${repl_log_file}
 }
