@@ -7,7 +7,7 @@ retrieve_current_target_repl_id() {
 #
 local out_file="${TMP_DIR}/repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
- -n ${beeline_user} \
+ -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
  >${out_file} \
@@ -24,7 +24,7 @@ retrieve_post_load_target_repl_id() {
 #
 local out_file="${TMP_DIR}/post_load_repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
- -n ${beeline_user} \
+ -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
  > ${out_file} \
@@ -49,7 +49,7 @@ then
   local initReplChangeManager_out_file="${TMP_DIR}/initReplChangeManager.out"
 
   beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
-    -n ${beeline_user} \
+    -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
     -f ${INITREPLCHANGEMANAGER_HQL} \
     > ${initReplChangeManager_out_file} \
@@ -69,7 +69,7 @@ else
 fi
 
 beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
- -n ${beeline_user} \
+ -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${HQL_FILE} \
  > ${out_file} \
@@ -103,7 +103,7 @@ gen_incremental_dump_source() {
 local HQL_FILE=$1
 local out_file="${TMP_DIR}/repl_incdump_beeline.out"
 beeline -u ${SOURCE_JDBC_URL} ${beeline_opts} \
- -n ${beeline_user} \
+ -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  --hivevar last_repl_id=${last_repl_id} \
  -f ${HQL_FILE} \
@@ -150,7 +150,7 @@ do
   fi
   
   beeline -u ${TARGET_JDBC_URL} ${beeline_opts} \
-    -n ${beeline_user} \
+    -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
     --hivevar src_dump_path=${src_dump_path} \
     -f ${LOAD_HQL} \
