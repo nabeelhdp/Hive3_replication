@@ -33,5 +33,5 @@ APPLY_DB_LOCK=false # [true|false]
 # Enable this flag to upload
 HDFS_UPLOAD=false  # [true|false]
 # Create this folder before configuring it here.
-hdfs_upload_dir=
+HDFS_UPLOAD_DIR=
 
