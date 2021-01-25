@@ -78,7 +78,7 @@ if [[ ${last_repl_id} == "NULL" ]]; then
   printmessage "Database ${DBNAME} is being synced for the first time. Initiating full dump."
   
   # Point to corresponding HQL file depending on whether external tables are to be included or not
-  if [[ ${include_external_tables} == 'true' ]]; then
+  if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
     printmessage "Including external tables in full dump"
     gen_bootstrap_dump_source ${EXT_BOOTSTRAP_HQL}
   else 
@@ -98,7 +98,7 @@ if [[ ${last_repl_id} == "NULL" ]]; then
     printmessage "Initiating data load at target cluster on database ${DBNAME}."
 
     # Point to corresponding HQL file depending on whether external tables are to be included or not
-    if [[ ${include_external_tables} == 'true' ]]; then
+    if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
       HQL_FILE=${EXT_LOAD_HQL}
     else 
@@ -145,7 +145,7 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${DBNAME} transaction ID at target is currently |${last_repl_id}|"
 
   # dump generation command returns latest transaction id at source
-  if [[ ${include_external_tables} == 'true' ]]; then
+  if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
     printmessage "Including external tables in incremental dump"
     gen_incremental_dump_source ${EXT_INC_DUMP_HQL}
   else 
@@ -164,7 +164,7 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     printmessage "Initiating REPL LOAD at destination cluster to replicate ${DBNAME} to transaction id |${source_latest_txid}|."
     
     # Point to corresponding HQL file depending on whether external tables are to be included or not
-    if [[ ${include_external_tables} == 'true' ]]; then
+    if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
       HQL_FILE=${EXT_LOAD_HQL}
     else 
