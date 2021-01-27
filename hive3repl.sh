@@ -54,7 +54,7 @@ REPL_LOG_FILE="${LOG_DIR}/replication_${DBNAME}_${CURRENT_TIME}.log"
 # Optional db level lock to avoid overlapping runs for same database.
 # Defaults to false, i.e. no locking in place. 
 # Use flock when invoking script as an alternative if needed.
-if [[ ${APPLY_DB_LOCK} == 'true' ]]
+if [[ "${APPLY_DB_LOCK}" == "true" ]]
 then
   lock_name=${SCRIPT_NAME}_${DBNAME}.lock
   check_instance_lock ${lock_name}
@@ -73,12 +73,12 @@ retrieve_current_target_repl_id
 
 # If the REPL STATUS output is "NULL", it means the database has not been replicated.
 # So a full dump will be generated.
-if [[ ${last_repl_id} == "NULL" ]]; then
+if [[ "${last_repl_id}" == "NULL" ]]; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
   printmessage "Database ${DBNAME} is being synced for the first time. Initiating full dump."
   
   # Point to corresponding HQL file depending on whether external tables are to be included or not
-  if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
+  if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
     printmessage "Including external tables in full dump"
     gen_bootstrap_dump_source ${EXT_BOOTSTRAP_HQL}
   else 
@@ -91,14 +91,14 @@ if [[ ${last_repl_id} == "NULL" ]]; then
   printmessage "Source transaction id: |${source_latest_txid}|"
 
   # If dump is generated successfully, a proper integer value is returned.
-  if [[ ${source_latest_txid} > 0 ]]; then
+  if [[ "${source_latest_txid}" -gt 0 ]]; then
     printmessage "Database ${DBNAME} full dump has been generated at |${SOURCE_HDFS_PREFIX}${dump_path}|."
     printmessage "The current transaction ID at source is |${source_latest_txid}|"
     printmessage "There are ${source_latest_txid} transactions to be synced in this run."
     printmessage "Initiating data load at target cluster on database ${DBNAME}."
 
     # Point to corresponding HQL file depending on whether external tables are to be included or not
-    if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
+    if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
       HQL_FILE=${EXT_LOAD_HQL}
     else 
@@ -113,12 +113,12 @@ if [[ ${last_repl_id} == "NULL" ]]; then
     if replay_dump_at_target ${HQL_FILE}; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
-      if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
+      if [[ "${post_load_repl_id}" == "${source_latest_txid}" ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
-      elif [[ ${post_load_repl_id} == "NULL" ]] ; then
+      elif [[ "${post_load_repl_id}" == "NULL" ]] ; then
         printmessage "Database replication FAILED. No transactions have been applied in this run."
         # TODO - cleanup directories leftover during failed replication (if any) 
-      elif [ ${post_load_repl_id} -gt ${source_latest_txid} ] ; then
+      elif [[ ${post_load_repl_id} -gt ${source_latest_txid} ]] ; then
         printmessage "Transaction event ID in target is ahead of the event ID at source at time of current dump."
         printmessage "This may happen if there is another REPL LOAD in progress with a later copy of the source dump"
      else
@@ -141,11 +141,11 @@ if [[ ${last_repl_id} == "NULL" ]]; then
 
 # If the database at target cluster already has some transaction replayed, 
 # trigger the source dump as an incremental dump.
-elif [[ ${last_repl_id} =~ ${re} ]] ; then
+elif [[ "${last_repl_id}" =~ "${re}" ]] ; then
   printmessage "Database ${DBNAME} transaction ID at target is currently |${last_repl_id}|"
 
   # dump generation command returns latest transaction id at source
-  if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
+  if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
     printmessage "Including external tables in incremental dump"
     gen_incremental_dump_source ${EXT_INC_DUMP_HQL}
   else 
@@ -157,14 +157,14 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
   source_latest_txid=${dump_txid}
   printmessage "The current transaction ID at source is |${source_latest_txid}|"
 
-  if [[ ${source_latest_txid} > 0 ]]; then
+  if [[ "${source_latest_txid}" -gt 0 ]]; then
     printmessage "Database ${DBNAME} incremental dump has been generated at |${SOURCE_HDFS_PREFIX}${dump_path}|."
     # the calculation of txn_count below doesn't match with numEvents that show up in the 
     #txn_count=$((${source_latest_txid} - ${last_repl_id}))
     printmessage "Initiating REPL LOAD at destination cluster to replicate ${DBNAME} to transaction id |${source_latest_txid}|."
     
     # Point to corresponding HQL file depending on whether external tables are to be included or not
-    if [[ ${INCLUDE_EXTERNAL_TABLES} == 'true' ]]; then
+    if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
       printmessage "External tables included. This may trigger distcp jobs in background."
       HQL_FILE=${EXT_LOAD_HQL}
     else 
@@ -177,11 +177,11 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
     if replay_dump_at_target ${HQL_FILE}; then 
       printmessage "Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
-      if [[ ${post_load_repl_id} == ${source_latest_txid} ]] ; then
+      if [[ "${post_load_repl_id}" == "${source_latest_txid}" ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
-      elif [[ ${post_load_repl_id} == ${last_repl_id} ]] ; then
+      elif [[ "${post_load_repl_id}" == "${last_repl_id}" ]] ; then
         printmessage "Database replication FAILED. No transactions have been applied in this run."
-      elif [ ${post_load_repl_id} -gt ${source_latest_txid} ] ; then
+      elif [[ ${post_load_repl_id} -gt ${source_latest_txid} ]] ; then
         printmessage "Transaction event ID in target is ahead of the event ID at source at time of current dump."
         printmessage "This may happen if there is another REPL LOAD in progress with a later copy of the source dump"
       else
