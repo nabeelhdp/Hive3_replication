@@ -110,7 +110,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
 
-if [[ "${dump_path}" != "${REPL_ROOT}"* ]]; then
+if [[ "${dump_path}" != "${REPL_ROOT}"* ]]
  then
   printmessage "Could not generate database dump for ${DBNAME} at source.\n"
   return 0
