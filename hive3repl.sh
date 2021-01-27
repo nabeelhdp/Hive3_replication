@@ -141,7 +141,7 @@ if [[ "${last_repl_id}" == "NULL" ]]; then
 
 # If the database at target cluster already has some transaction replayed, 
 # trigger the source dump as an incremental dump.
-elif [[ "${last_repl_id}" =~ "${re}" ]] ; then
+elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${DBNAME} transaction ID at target is currently |${last_repl_id}|"
 
   # dump generation command returns latest transaction id at source
