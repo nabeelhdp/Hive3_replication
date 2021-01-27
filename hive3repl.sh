@@ -60,8 +60,8 @@ then
   check_instance_lock ${lock_name}
 fi
 
-trap ' { trap_log_int ${lock_name}}' INT TERM
-trap ' { trap_log_exit ${lock_name}} ' EXIT 
+trap ' trap_log_int ${lock_name} ' INT TERM
+trap ' trap_log_exit ${lock_name} ' EXIT 
 
 echo "===================================================================" >>${REPL_LOG_FILE}
 printmessage "Initiating run to replicate ${DBNAME} to ${DBNAME}."
