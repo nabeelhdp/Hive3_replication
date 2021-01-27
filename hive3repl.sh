@@ -66,7 +66,7 @@ trap ' trap_log_exit ${lock_name} ' EXIT
 echo "===================================================================" >>${REPL_LOG_FILE}
 printmessage "Initiating run to replicate ${DBNAME} to ${DBNAME}."
 echo "==================================================================="  >>${REPL_LOG_FILE}
-echo " For detailed logging, run tail -f on ${REPL_LOG_FILE}"
+echo "For detailed logging, run tail -f on ${REPL_LOG_FILE}"
 
 # Retrieve the current state of replication in the target cluster.
 retrieve_current_target_repl_id
