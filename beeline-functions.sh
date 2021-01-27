@@ -1,7 +1,6 @@
 #!/bin/bash
 
 retrieve_current_target_repl_id() {
-
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target before replication
 #
@@ -12,13 +11,10 @@ beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -f ${STATUS_HQL} \
  >${OUT_FILE} \
  2>>${REPL_LOG_FILE}
-
 last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE} )
-
 }
 
 retrieve_post_load_target_repl_id() {
-
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target after replication
 #
@@ -29,13 +25,10 @@ beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -f ${STATUS_HQL} \
  > ${OUT_FILE} \
  2>>${REPL_LOG_FILE} 
- 
 post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE} )
-
 }
 
 gen_bootstrap_dump_source() {
-
 # ----------------------------------------------------------------------------
 # dump entire database at source hive instance for first time
 #
@@ -77,7 +70,7 @@ beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
 
 ## If dump lock exists and is created by the current process, 
 ## remove the lock since dump is now complete
-if [[$(cat ${dump_lockfile}) == $$]]; then
+if [[ $(cat ${dump_lockfile}) == $$ ]]; then
   rm  ${dump_lockfile}
 fi
 
@@ -110,7 +103,6 @@ beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
  > ${OUT_FILE} \
  2>>${REPL_LOG_FILE}
 
-
 # Extract dump path and transaction id from the output
 dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE})
 dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
@@ -125,7 +117,6 @@ if [[ "${dump_path}" != "${REPL_ROOT}"* ]]; then
 else
   return 1
 fi
-
 }
 
 
@@ -143,12 +134,10 @@ local retval=1
 
 while [[ ${retry_counter} -le $INCR_RERUN ]]
 do
-
   if [[ ${retry_counter} -gt 1 ]]
   then
       printmessage "Retrying load. Attempt number: ${retry_counter}"
   fi
-  
   beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
@@ -156,7 +145,6 @@ do
     -f ${LOAD_HQL} \
     >${OUT_FILE} \
     2>>${REPL_LOG_FILE}
-
   retval=$?
   if [[ ${retval} -gt 0 ]]
   then
@@ -167,7 +155,5 @@ do
   fi
   retry_counter=$[${retry_counter}+1]
 done
-
 return ${retval}
-
 }
