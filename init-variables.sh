@@ -14,7 +14,6 @@ post_load_repl_id=""
 # Regex to detect if transaction ID is number
 re='^[0-9]+$'
 
-
 # Set unique value for logs and output directory based on time of script run
 CURRENT_TIME=$(date +"%Y_%m_%d_%I_%M_%p")
 
