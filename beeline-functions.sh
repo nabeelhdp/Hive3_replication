@@ -42,7 +42,7 @@ gen_bootstrap_dump_source() {
 local HQL_FILE=$1
 local OUT_FILE="${TMP_DIR}/repl_fulldump_beeline.out"
 
-if [[ ${INIT_REPL_CHANGE_MANAGER} == "true" ]]
+if [[ "${INIT_REPL_CHANGE_MANAGER}" == "true" ]]
 then 
   # Apply workaroud for the issue in this page (HDP 3.1.4)
   # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
@@ -60,7 +60,7 @@ fi
 local dump_lockfile=${RUN_DIR}/dump.lock
 
 ## Check if any bootstrap dump is running. If so exit.
-if [ -e ${dump_lockfile} ]; then
+if [[ -e "${dump_lockfile}" ]]; then
   printmessage "Boostrap dump in progress by pid another database, exiting"
   exit 1
 else
@@ -88,7 +88,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
 
-if [[ ${dump_path} != ${REPL_ROOT}* ]]; then
+if [[ "${dump_path}" != "${REPL_ROOT}"* ]]; then
   printmessage "Could not generate database dump for ${DBNAME} at source.\n"
   return 0
 else
@@ -118,7 +118,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
 
-if [[ ${dump_path} != ${repl_root}* ]]
+if [[ "${dump_path}" != "${REPL_ROOT}"* ]]; then
  then
   printmessage "Could not generate database dump for ${DBNAME} at source.\n"
   return 0
@@ -141,10 +141,10 @@ local LOAD_HQL=$1
 local retry_counter=1
 local retval=1
 
-while [ ${retry_counter} -le $INCR_RERUN ]
+while [[ ${retry_counter} -le $INCR_RERUN ]]
 do
 
-  if [ ${retry_counter} -gt 1 ]
+  if [[ ${retry_counter} -gt 1 ]]
   then
       printmessage "Retrying load. Attempt number: ${retry_counter}"
   fi
@@ -158,7 +158,7 @@ do
     2>>${REPL_LOG_FILE}
 
   retval=$?
-  if [ ${retval} -gt 0 ]
+  if [[ ${retval} -gt 0 ]]
   then
     printmessage "REPL Load failed, return code is: ${retval}"
     printmessage "Number of failed attempts: ${retry_counter}"
