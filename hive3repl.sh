@@ -191,7 +191,7 @@ elif [[ "${last_repl_id}" =~ "${re}" ]] ; then
       fi
     else 
       printmessage "Data load at target cluster failed" 
-      echo -e "See ${repl_log_file} for details. Exiting!" 
+      echo -e "See ${REPL_LOG_FILE} for details. Exiting!" 
       exit 1
     fi 
         
@@ -203,6 +203,6 @@ elif [[ "${last_repl_id}" =~ "${re}" ]] ; then
 
 else
   printmessage "Invalid value for last replicated transaction id: ${last_repl_id}. Database dump failed"
-  echo -e "See ${repl_log_file} for details. Exiting!"
+  echo -e "See ${REPL_LOG_FILE} for details. Exiting!"
   exit 1
 fi
