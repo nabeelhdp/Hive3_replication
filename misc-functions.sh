@@ -1,7 +1,6 @@
 #!/bin/bash
 
 printmessage() {
-
 # ----------------------------------------------------------------------------
 # Function to add timestamps to messages and write to log file
 #
@@ -11,7 +10,6 @@ printmessage() {
 }
 
 trap_log_int() {
-
 # ----------------------------------------------------------------------------
 # Function to identify if a Ctrl-C has been issued against the script run.
 #
@@ -113,7 +111,6 @@ upload_logs_to_hdfs() {
 }
 
 check_instance_lock() {
-
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target after replication
 #
@@ -136,7 +133,6 @@ if [[ -e "${lock_file}" ]]; then
 fi
 ## Create the lockfile by printing the script's PID into it
 echo $$ > ${lock_file}
-
 }
 
 script_usage() {
