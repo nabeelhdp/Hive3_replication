@@ -13,7 +13,7 @@ trap_log_int() {
 # ----------------------------------------------------------------------------
 # Function to identify if a Ctrl-C has been issued against the script run.
 #
-  printmessage "Ctrl-C attempted. Aborting!"
+  printmessage " ERROR: Ctrl-C attempted. Aborting!"
   
   if [[ "${APPLY_DB_LOCK}" == "true" ]]; then
     # Removing lock file upon completion of run
@@ -21,6 +21,7 @@ trap_log_int() {
     # A second script checking the lock and exiting should not remove the lock
     # of the first instance which is running. Henc adding a pid check
     if [[ $(cat ${lock_file}) == $$ ]]; then
+      printmessage " INFO: Removing lock file ${lock_file}"
       rm  ${lock_file}
     fi
   fi
@@ -30,11 +31,12 @@ trap_log_int() {
   local dump_lockfile=${RUN_DIR}/dump.lock
   if [[ -e "${dump_lockfile}" ]]; then
     if [[$(cat ${dump_lockfile}) == $$]]; then
+      printmessage " INFO: Removing Dump lock file ${lock_file}"
       rm  ${dump_lockfile}
     fi
   fi
  
-  printmessage "Lock files removed"
+  printmessage " INFO: Lock files removed"
 
 }
 
@@ -54,6 +56,7 @@ trap_log_exit() {
     # of the first instance which is running. Henc adding a pid check
     if [[ -e "${lock_file}" ]]; then
       if [[$(cat ${lock_file}) == $$]]; then
+        printmessage " INFO: Removing lock file ${lock_file}"
         rm  ${lock_file}
       fi
     fi
@@ -66,20 +69,21 @@ trap_log_exit() {
   ## remove the lock since dump is now complete
   if [[ -e "${dump_lockfile}" ]]; then
     if [[$(cat ${dump_lockfile}) == $$]]; then
+      printmessage " INFO: Removing Dump lock file ${dump_lockfile}"
       rm  ${dump_lockfile}
     fi
   fi
   
-  printmessage "Lock files removed"
+  printmessage " INFO: Lock files removed"
   duration=$SECONDS
-  printmessage "Script run took $(($duration / 60)) minutes and $(($duration % 60)) seconds "
+  printmessage " INFO: Script run took $(($duration / 60)) minutes and $(($duration % 60)) seconds "
 
   if [[ "${HDFS_UPLOAD}" == "true" ]]; then
     if [[ "${HDFS_UPLOAD_DIR}" != "" ]]; then
       upload_logs_to_hdfs
     else
-      printmessage "No path specified for HDFS upload."
-      printmessage "Will skip log upload to HDFS."
+      printmessage " WARN: No path specified for HDFS upload."
+      printmessage " WARN: Will skip log upload to HDFS."
     fi
   fi
   
@@ -92,17 +96,17 @@ upload_logs_to_hdfs() {
   local dirtest_retval=$?
   if [[ "${dirtest_retval}" -eq 0 ]]; then
     # if path exists will attempt log upload.TODO: Check perms before upload.
-    printmessage "Uploading replication log to HDFS Upload directory."
+    printmessage " INFO: Uploading replication log to HDFS Upload directory."
     hdfs dfs -put ${REPL_LOG_FILE} ${HDFS_UPLOAD_DIR} 2>&1
     local upload_retval=$?
     if [[ "${upload_retval}" -eq 0 ]]; then
-      echo "Uploaded replication log to HDFS Upload directory."
+      echo " INFO: Uploaded replication log to HDFS Upload directory."
     else
-      echo "Replication log upload to HDFS Upload directory failed."
+      echo " ERROR: Replication log upload to HDFS Upload directory failed."
     fi
   else
-    printmessage "Upload path ${HDFS_UPLOAD_DIR} does not exist in HDFS. "
-    printmessage "Will skip log upload to HDFS."
+    printmessage " WARN: Upload path ${HDFS_UPLOAD_DIR} does not exist in HDFS. "
+    printmessage " WARN: Will skip log upload to HDFS."
   fi
 
 }
@@ -118,13 +122,12 @@ if [[ -e "${lock_file}" ]]; then
     ## Check if the PID in the lockfile is a running instance
     ## of ${SCRIPT_NAME} to guard against failed runs
     if ps $(cat ${lock_file}) | grep ${SCRIPT_NAME} >/dev/null; then
-        printmessage "Script ${SCRIPT_NAME} is already running for ${DBNAME}, exiting"
+        printmessage " ERROR: Script ${SCRIPT_NAME} is already running for ${DBNAME}, exiting"
         exit 1
     else
-        printmessage "Lockfile ${lock_file} contains a stale PID."
-        printmessage "A previous replication run for ${DBNAME} may have failed halfway."
-        printmessage "Please confirm if the previous process exited, then delete the lock file:"
-        printmessage "${lock_file} before proceeding."
+        printmessage " ERROR: Lockfile ${lock_file} contains a stale PID."
+        printmessage " ERROR: A previous replication run for ${DBNAME} may have failed halfway."
+        printmessage " ERROR: Please confirm if the previous process exited, then delete the lock file: ${lock_file} before proceeding."
         exit 1
     fi
 fi
