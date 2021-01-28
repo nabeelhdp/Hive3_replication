@@ -137,15 +137,9 @@ if [[ "${last_repl_id}" == "NULL" ]]; then
 # trigger the source dump as an incremental dump.
 elif [[ ${last_repl_id} =~ ${re} ]] ; then
   printmessage "Database ${DBNAME} transaction ID at target is currently |${last_repl_id}|"
-
-  # dump generation command returns latest transaction id at source
-  if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
-    printmessage "Including external tables in incremental dump"
-    gen_incremental_dump_source ${EXT_INC_DUMP_HQL}
-  else 
-    printmessage "Skipping external tables in incremental dump"
-    gen_incremental_dump_source ${INC_DUMP_HQL}
-  fi 
+  
+  # Generate incremental dump at source
+  gen_incremental_dump_source
  
   # dump_txid is set in the above function to the current transaction ID at source cluster for the database
   source_latest_txid=${dump_txid}
