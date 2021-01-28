@@ -19,6 +19,8 @@ BEELINE_USER="hive"
 
 # Number of attempts to retry a failed incremental repl load
 INCR_RERUN=3
+# Sleep interval  between retry attempts
+RERUN_SLEEP=60
 
 # Flag to apply workaround in HDP 3.1.4 for this error
 # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
