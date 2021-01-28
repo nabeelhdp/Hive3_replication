@@ -4,36 +4,36 @@ retrieve_current_target_repl_id() {
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target before replication
 #
-local OUT_FILE="${TMP_DIR}/repl_status_beeline.out"
+local out_file="${TMP_DIR}/repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
- >${OUT_FILE} \
+ >${out_file} \
  2>>${REPL_LOG_FILE}
-last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE} )
+last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 }
 
 retrieve_post_load_target_repl_id() {
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target after replication
 #
-local OUT_FILE="${TMP_DIR}/post_load_repl_status_beeline.out"
+local out_file="${TMP_DIR}/post_load_repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  -f ${STATUS_HQL} \
- > ${OUT_FILE} \
+ > ${out_file} \
  2>>${REPL_LOG_FILE} 
-post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE} )
+post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 }
 
 gen_bootstrap_dump_source() {
 # ----------------------------------------------------------------------------
 # dump entire database at source hive instance for first time
 #
-local HQL_FILE=$1
-local OUT_FILE="${TMP_DIR}/repl_fulldump_beeline.out"
+local hql_file=$1
+local out_file="${TMP_DIR}/repl_fulldump_beeline.out"
 
 if [[ "${INIT_REPL_CHANGE_MANAGER}" == "true" ]]
 then 
@@ -64,8 +64,8 @@ fi
 beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
- -f ${HQL_FILE} \
- > ${OUT_FILE} \
+ -f ${hql_file} \
+ > ${out_file} \
  2>>${REPL_LOG_FILE}
 
 ## If dump lock exists and is created by the current process, 
@@ -75,8 +75,8 @@ if [[ $(cat ${dump_lockfile}) == $$ ]]; then
 fi
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE})
-dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
+dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
@@ -93,19 +93,19 @@ gen_incremental_dump_source() {
 # ----------------------------------------------------------------------------
 # dump database at source hive instance from the last_repl_id at target
 #
-local HQL_FILE=$1
-local OUT_FILE="${TMP_DIR}/repl_incdump_beeline.out"
+local hql_file=$1
+local out_file="${TMP_DIR}/repl_incdump_beeline.out"
 beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
  --hivevar last_repl_id=${last_repl_id} \
- -f ${HQL_FILE} \
- > ${OUT_FILE} \
+ -f ${hql_file} \
+ > ${out_file} \
  2>>${REPL_LOG_FILE}
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${OUT_FILE})
-dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${OUT_FILE})
+dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
@@ -127,8 +127,8 @@ replay_dump_at_target(){
 
 # Add prefix for source cluster to dump directory when running at target cluster
 SOURCE_DUMP_PATH="${SOURCE_HDFS_PREFIX}${dump_path}"
-local OUT_FILE="${TMP_DIR}/repl_load_beeline.out"
-local LOAD_HQL=$1
+local out_file="${TMP_DIR}/repl_load_beeline.out"
+local hql_file=$1
 local retry_counter=1
 local retval=1
 
@@ -136,14 +136,16 @@ while [[ ${retry_counter} -le $INCR_RERUN ]]
 do
   if [[ ${retry_counter} -gt 1 ]]
   then
+      printmessage "Sleeping ${RERUN_SLEEP} seconds before retry"
+      RERUN_SLEEP
       printmessage "Retrying load. Attempt number: ${retry_counter}"
   fi
   beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
     --hivevar src_dump_path=${SOURCE_DUMP_PATH} \
-    -f ${LOAD_HQL} \
-    >${OUT_FILE} \
+    -f ${hql_file} \
+    >${out_file} \
     2>>${REPL_LOG_FILE}
   retval=$?
   if [[ ${retval} -gt 0 ]]
