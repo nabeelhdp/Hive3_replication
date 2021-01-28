@@ -36,10 +36,10 @@ gen_bootstrap_dump_source() {
 # Point to corresponding HQL file depending on whether external tables are to be included or not
 local hql_file=""
 if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
-  printmessage "Including external tables in full dump"
+  printmessage " INFO: Including external tables in full dump"
   hql_file=${EXT_BOOTSTRAP_HQL}
 else 
-  printmessage "Skipping external tables in full dump"
+  printmessage " INFO: Skipping external tables in full dump"
   hql_file=${BOOTSTRAP_HQL}
 fi 
 local out_file="${TMP_DIR}/repl_fulldump_beeline.out"
@@ -60,7 +60,7 @@ local dump_lockfile=${RUN_DIR}/dump.lock
 
 ## Check if any bootstrap dump is running. If so exit.
 if [[ -e "${dump_lockfile}" ]]; then
-  printmessage "Boostrap dump in progress by pid another database, exiting"
+  printmessage " ERROR: Boostrap dump in progress by pid another database, exiting"
   exit 1
 else
   ## Create the lockfile by printing the script's PID into it  and proceed
@@ -88,7 +88,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 # begins with configured location for replication dump.
 
 if [[ "${dump_path}" != "${REPL_ROOT}"* ]]; then
-  printmessage "Could not generate database dump for ${DBNAME} at source.\n"
+  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
   return 0
 else
   return 1
@@ -102,10 +102,10 @@ gen_incremental_dump_source() {
 local hql_file=""
 # dump generation command returns latest transaction id at source
 if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
-  printmessage "Including external tables in incremental dump"
+  printmessage " INFO: Including external tables in incremental dump"
   hql_file=${EXT_INC_DUMP_HQL}
 else 
-  printmessage "Skipping external tables in incremental dump"
+  printmessage " INFO: Skipping external tables in incremental dump"
   hql_file=${INC_DUMP_HQL}
 fi 
 local out_file="${TMP_DIR}/repl_incdump_beeline.out"
@@ -126,7 +126,7 @@ dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 if [[ "${dump_path}" != "${REPL_ROOT}"* ]]
  then
-  printmessage "Could not generate database dump for ${DBNAME} at source.\n"
+  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
   return 0
 else
   return 1
@@ -150,9 +150,9 @@ while [[ ${retry_counter} -le $INCR_RERUN ]]
 do
   if [[ ${retry_counter} -gt 1 ]]
   then
-      printmessage "Sleeping ${RERUN_SLEEP} seconds before retry"
+      printmessage " INFO: Sleeping ${RERUN_SLEEP} seconds before retry"
       RERUN_SLEEP
-      printmessage "Retrying load. Attempt number: ${retry_counter}"
+      printmessage " INFO: Retrying load. Attempt number: ${retry_counter}"
   fi
   beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
@@ -164,8 +164,8 @@ do
   retval=$?
   if [[ ${retval} -gt 0 ]]
   then
-    printmessage "REPL Load failed, return code is: ${retval}"
-    printmessage "Number of failed attempts: ${retry_counter}"
+    printmessage " ERROR: REPL Load failed, return code is: ${retval}"
+    printmessage " ERROR: Number of failed attempts: ${retry_counter}"
   else
     break
   fi
