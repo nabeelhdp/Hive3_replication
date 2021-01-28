@@ -112,7 +112,10 @@ if [[ "${last_repl_id}" == "NULL" ]]; then
       elif [[ "${post_load_repl_id}" == "NULL" ]] ; then
         printmessage "Database replication FAILED. No transactions have been applied in this run."
         # TODO - cleanup directories leftover during failed replication (if any) 
-      elif [[ ${post_load_repl_id} -gt ${source_latest_txid} ]] ; then
+     elif [[ ${post_load_repl_id} -lt ${source_latest_txid} ]] ; then
+        printmessage "ERROR: Transaction event ID in target is behind the event ID at source at time of current dump."
+        printmessage "ERROR: This will require a cleanup of the partially loaded database in target."
+     elif [[ ${post_load_repl_id} -gt ${source_latest_txid} ]] ; then
         printmessage "Transaction event ID in target is ahead of the event ID at source at time of current dump."
         printmessage "This may happen if there is another REPL LOAD in progress with a later copy of the source dump"
      else
@@ -169,7 +172,10 @@ elif [[ ${last_repl_id} =~ ${re} ]] ; then
         printmessage "Database replication completed SUCCESSFULLY. Last transaction id at target is |${post_load_repl_id}|"
       elif [[ "${post_load_repl_id}" == "${last_repl_id}" ]] ; then
         printmessage "Database replication FAILED. No transactions have been applied in this run."
-      elif [[ ${post_load_repl_id} -gt ${source_latest_txid} ]] ; then
+      elif [[ ${post_load_repl_id} -lt ${source_latest_txid} ]] ; then
+        printmessage "WARN: Transaction event ID in target is behind the event ID at source at time of current dump."
+        printmessage "INFO: This can be fixed by a rerun of the script."
+     elif [[ ${post_load_repl_id} -gt ${source_latest_txid} ]] ; then
         printmessage "Transaction event ID in target is ahead of the event ID at source at time of current dump."
         printmessage "This may happen if there is another REPL LOAD in progress with a later copy of the source dump"
       else
