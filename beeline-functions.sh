@@ -32,15 +32,21 @@ gen_bootstrap_dump_source() {
 # ----------------------------------------------------------------------------
 # dump entire database at source hive instance for first time
 #
-local hql_file=$1
-local out_file="${TMP_DIR}/repl_fulldump_beeline.out"
 
-if [[ "${INIT_REPL_CHANGE_MANAGER}" == "true" ]]
-then 
+# Point to corresponding HQL file depending on whether external tables are to be included or not
+local hql_file=""
+if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
+  printmessage "Including external tables in full dump"
+  hql_file=${EXT_BOOTSTRAP_HQL}
+else 
+  printmessage "Skipping external tables in full dump"
+  hql_file=${BOOTSTRAP_HQL}
+fi 
+local out_file="${TMP_DIR}/repl_fulldump_beeline.out"
+if [[ "${INIT_REPL_CHANGE_MANAGER}" == "true" ]]; then
   # Apply workaroud for the issue in this page (HDP 3.1.4)
   # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
   local INIT_REPL_CHANGE_MANAGER_OUT_FILE="${TMP_DIR}/initReplChangeManager.out"
-
   beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
@@ -93,7 +99,15 @@ gen_incremental_dump_source() {
 # ----------------------------------------------------------------------------
 # dump database at source hive instance from the last_repl_id at target
 #
-local hql_file=$1
+local hql_file=""
+# dump generation command returns latest transaction id at source
+if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
+  printmessage "Including external tables in incremental dump"
+  hql_file=${EXT_INC_DUMP_HQL}
+else 
+  printmessage "Skipping external tables in incremental dump"
+  hql_file=${INC_DUMP_HQL}
+fi 
 local out_file="${TMP_DIR}/repl_incdump_beeline.out"
 beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
