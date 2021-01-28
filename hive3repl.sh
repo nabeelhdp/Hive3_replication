@@ -77,14 +77,8 @@ if [[ "${last_repl_id}" == "NULL" ]]; then
   printmessage "No replication id detected at target. Full data dump dump needs to be initiated."
   printmessage "Database ${DBNAME} is being synced for the first time. Initiating full dump."
   
-  # Point to corresponding HQL file depending on whether external tables are to be included or not
-  if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
-    printmessage "Including external tables in full dump"
-    gen_bootstrap_dump_source ${EXT_BOOTSTRAP_HQL}
-  else 
-    printmessage "Skipping external tables in full dump"
-    gen_bootstrap_dump_source ${BOOTSTRAP_HQL}
-  fi 
+  # Generate bootstrap dump at source
+  gen_bootstrap_dump_source
   
   # dump_txid is set in the above function to the current transaction ID at source cluster for the database
   source_latest_txid=${dump_txid}
