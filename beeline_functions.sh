@@ -195,10 +195,19 @@ replay_dump_at_target(){
 # Add prefix for source cluster to dump directory when running at target cluster
 local source_dump_path="${SOURCE_HDFS_PREFIX}${DUMP_PATH}"
 local out_file="${TMP_DIR}/repl_load_beeline.out"
-local hql_file=$1
+local hql_file=""
 local retry_counter=1
 local retval=1
 
+# Point to corresponding HQL file depending on whether external tables are to be included or not
+if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
+  printmessage " INFO: External tables included. This may trigger distcp jobs in background."
+  hql_file=${EXT_LOAD_HQL}
+else 
+  printmessage " INFO: External tables not included."
+  hql_file=${LOAD_HQL}
+fi 
+    
 # Retry a failed incremental repl load upto $INCR_RERUN times
 while [[ ${retry_counter} -le ${INCR_RERUN} ]]
 do
