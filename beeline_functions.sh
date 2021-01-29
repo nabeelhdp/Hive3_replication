@@ -141,7 +141,7 @@ replay_dump_at_target(){
 #
 
 # Add prefix for source cluster to dump directory when running at target cluster
-SOURCE_DUMP_PATH="${SOURCE_HDFS_PREFIX}${dump_path}"
+SOURCE_DUMP_PATH="${SOURCE_HDFS_PREFIX}${DUMP_PATH}"
 local out_file="${TMP_DIR}/repl_load_beeline.out"
 local hql_file=$1
 local retry_counter=1
