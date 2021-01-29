@@ -94,9 +94,6 @@ if [[ "${LAST_REPL_ID}" == "NULL" ]]; then
 
   # If dump is generated successfully, a proper integer value is returned.
   if [[ "${DUMP_TXID}" -gt 0 ]]; then
-    printmessage " INFO: Database ${DBNAME} full dump has been generated at |${SOURCE_HDFS_PREFIX}${DUMP_PATH}|."
-    printmessage " INFO: The current transaction ID at source is |${DUMP_TXID}|"
-    printmessage " INFO: There are ${DUMP_TXID} transactions to be synced in this run."
     printmessage " INFO: Initiating data load at target cluster on database ${DBNAME}."
 
     # Point to corresponding HQL file depending on whether external tables are to be included or not
@@ -138,7 +135,11 @@ if [[ "${LAST_REPL_ID}" == "NULL" ]]; then
         
   # If DUMP_TXID is anything but a proper number, 
   # it indicates a failure in geenerating the source dump. Exit.
-  else
+  else  
+    printmessage " ERROR: Invalid transaction id returned from Source : |${DUMP_TXID}|"
+    # Print error message to console
+    local errormsg=$(egrep -e ^(Error|ERROR) -e FAILED ${REPL_LOG_FILE} | tail -1)
+    echo "${errormsg}"
     printmessage " ERROR: Unable to generate full dump for database ${DBNAME}. Exiting!."
     exit 1
   fi
@@ -151,12 +152,8 @@ elif [[ ${LAST_REPL_ID} =~ ${TXN_ID_REGEX} ]] ; then
   
   # Generate incremental dump at source
   gen_incremental_dump_source
- 
-  # DUMP_TXID is set in the above function to the current transaction ID at source cluster for the database
-  printmessage " INFO: Source transaction ID at the time of dump: |${DUMP_TXID}|"
 
   if [[ "${DUMP_TXID}" -gt 0 ]]; then
-    printmessage " INFO: Database ${DBNAME} incremental dump has been generated at |${SOURCE_HDFS_PREFIX}${DUMP_PATH}|."
     printmessage " INFO: Initiating REPL LOAD at destination cluster to replicate ${DBNAME} to transaction id |${DUMP_TXID}|."
     
     # Point to corresponding HQL file depending on whether external tables are to be included or not
@@ -193,13 +190,14 @@ elif [[ ${LAST_REPL_ID} =~ ${TXN_ID_REGEX} ]] ; then
       echo -e "See ${REPL_LOG_FILE} for details. Exiting!" 
       exit 1
     fi 
-        
   else
     printmessage " ERROR: Invalid transaction id returned from Source : |${DUMP_TXID}|"
+    # Print error message to console
+    local errormsg=$(egrep -e ^(Error|ERROR) -e FAILED ${REPL_LOG_FILE} | tail -1)
+    echo "${errormsg}"
     printmessage " ERROR: Unable to generate incremental dump for database ${DBNAME}. Exiting!."
     exit 1
   fi
-
 else
   printmessage " ERROR: Invalid value for last replicated transaction id: ${LAST_REPL_ID}. Database dump failed"
   echo -e "See ${REPL_LOG_FILE} for details. Exiting!"
