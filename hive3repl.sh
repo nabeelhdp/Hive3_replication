@@ -43,9 +43,16 @@ fi
 [ -d ${LOG_DIR} ] || mkdir -p ${LOG_DIR} 
 
 SCRIPT_NAME=$(basename -- "$0")
+DBNAME=""
 
-# first argument is the db name 
-DBNAME=$1
+# Validate input argument
+if check_db_validity $1; then 
+  # first argument is the db name if validity check is passed
+  DBNAME=$1
+else
+  echo " ERROR: Database nane ${dbname} not listed in env.sh. Aborting!"
+  exit 1
+fi
 
 # location for log file
 # This was moved from init-variables.sh here because DBNAME is set here
@@ -54,8 +61,7 @@ REPL_LOG_FILE="${LOG_DIR}/replication_${DBNAME}_${CURRENT_TIME}.log"
 # Optional db level lock to avoid overlapping runs for same database.
 # Defaults to false, i.e. no locking in place. 
 # Use flock when invoking script as an alternative if needed.
-if [[ "${APPLY_DB_LOCK}" == "true" ]]
-then
+if [[ "${APPLY_DB_LOCK}" == "true" ]]; then
   lock_name=${SCRIPT_NAME}_${DBNAME}.lock
   check_instance_lock ${lock_name}
 fi
