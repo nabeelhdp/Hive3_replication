@@ -22,6 +22,7 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 |SOURCE_HDFS_PREFIX|Prefix to access HDFS locations at source cluster as accessed from target. Can use the Namenode IP:port or cluster nameservice id. Eg. `hdfs://c2186-node2.coelab.cloudera.com:8020` or `hdfs://c2186`"|
 |BEELINE_USER|User running beeline. In kerberized environments this may be ignored.|
 |INCR_RERUN|Number of attempts to retry a failed incremental repl load|
+|RERUN_SLEEP| Sleep interval in seconds between retry attempts|
 |TMP_DIR| Directory to store temporary files used for parsing beeline output. Default: ./tmp|
 |LOG_DIR| Directory to write script logs.  Default: ./logs|
 
