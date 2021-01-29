@@ -50,7 +50,7 @@ if check_db_validity $1; then
   # first argument is the db name if validity check is passed
   DBNAME=$1
 else
-  echo " ERROR: Database name ${DBNAME} not listed in env.sh. Aborting!"
+  echo "ERROR: Database name ${DBNAME} not listed in env.sh. Aborting!"
   exit 1
 fi
 
