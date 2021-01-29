@@ -4,9 +4,11 @@
 # Script Name : hive3-repl.sh
 # Description : Replicate Hive databases between two clusters. 
 #               Supports both managed and external tables.
-# Args        :
-# Author      : Nabeel Moidu
-# Email       : nmoidu@cloudera.com
+#               Auto detects a boostrap dump/load vs incremental.
+#               Supports retries for failed incremental load.
+# Args        : <database name>
+# Authors     : Nabeel Moidu, Roy White
+# Email       : nmoidu@cloudera.com, rwhite@cloudera.com
 ###################################################################
 
 # Add seconds inbuilt bash counter to track time of run.
