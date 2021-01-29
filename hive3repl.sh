@@ -23,13 +23,13 @@ source ${THIS_DIR}/env.sh
 # ----------------------------------------------------------------------------
 # Set global variables that should not be changed by user
 #
-source ${THIS_DIR}/init-variables.sh
+source ${THIS_DIR}/init_variables.sh
 
 # ----------------------------------------------------------------------------
 # Source common functions
 #
-source ${THIS_DIR}/misc-functions.sh
-source ${THIS_DIR}/beeline-functions.sh
+source ${THIS_DIR}/misc_functions.sh
+source ${THIS_DIR}/beeline_functions.sh
 
 
 ################ MAIN BEGINS HERE #########################
