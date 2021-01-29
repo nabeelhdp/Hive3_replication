@@ -140,10 +140,11 @@ check_db_validity() {
 # Validate dbname provided against list of valid names specified in env.sh
 #
 local dbname=$1
-local dbvalidity="0"
+local dbvalidity=1
 for db in ${DBLIST}; do
-    if [[ ${dbname} == ${db} ]]; then
-      dbvalidity="1"
+    if [[ "${dbname}" == "${db}" ]]; then
+      printmessage " INFO: Database nane ${dbname} validated successfully."
+      dbvalidity=0
     fi
 done
 return ${dbvalidity}
