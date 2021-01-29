@@ -135,6 +135,20 @@ fi
 echo $$ > ${lock_file}
 }
 
+check_db_validity() {
+# ----------------------------------------------------------------------------
+# Validate dbname provided against list of valid names specified in env.sh
+#
+local dbname=$1
+local dbvalidity="0"
+for db in ${DBLIST}; do
+    if [[ ${dbname} == ${db} ]]; then
+      dbvalidity="1"
+    fi
+done
+return ${dbvalidity}
+}
+
 script_usage() {
   echo -e "Usage : ${BASENAME} <database-name> \n"
   echo -e "**  It is recommended to run this script at the target cluster, but it should work in either cluster.\n" 
