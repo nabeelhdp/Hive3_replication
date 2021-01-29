@@ -171,7 +171,7 @@ do
   else
     break
   fi
-  retry_counter=$[${retry_counter}+1]
+  retry_counter=$(( retry_counter + 1 ))
 done
 return ${retval}
 }
