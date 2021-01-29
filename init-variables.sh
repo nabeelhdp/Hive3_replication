@@ -2,17 +2,17 @@
 
 # For one run of this script, we expect only one dump path.
 # Hence declaring it as global var to return from functions.
-dump_path=""
-dump_txid=""
+DUMP_PATH=""
+DUMP_TXID=""
 
 # current replication id at target before we begin replication
-last_repl_id=""
+LAST_REPL_ID=""
 
 # current replication id at target after we complete replication
-post_load_repl_id=""
+POST_LOAD_REPL_ID=""
 
 # Regex to detect if transaction ID is number
-re='^[0-9]+$'
+TXN_ID_REGEX='^[0-9]+$'
 
 # Set unique value for logs and output directory based on time of script run
 CURRENT_TIME=$(date +"%Y_%m_%d_%I_%M_%p")

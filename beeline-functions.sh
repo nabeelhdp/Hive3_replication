@@ -11,7 +11,7 @@ beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -f ${STATUS_HQL} \
  >${out_file} \
  2>>${REPL_LOG_FILE}
-last_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
+LAST_REPL_ID=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 }
 
 retrieve_post_load_target_repl_id() {
@@ -25,7 +25,7 @@ beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -f ${STATUS_HQL} \
  > ${out_file} \
  2>>${REPL_LOG_FILE} 
-post_load_repl_id=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
+POST_LOAD_REPL_ID=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file} )
 }
 
 gen_bootstrap_dump_source() {
@@ -43,9 +43,10 @@ else
   hql_file=${BOOTSTRAP_HQL}
 fi 
 local out_file="${TMP_DIR}/repl_fulldump_beeline.out"
+
+# Apply workaroud for the issue in page below for HDP 3.1.4 if flag is set in env.sh
+# https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
 if [[ "${INIT_REPL_CHANGE_MANAGER}" == "true" ]]; then
-  # Apply workaroud for the issue in this page (HDP 3.1.4)
-  # https://docs.cloudera.com/HDPDocuments/DLM1/DLM-1.5.1/administration/content/dlm_replchangemanager_error.html
   local INIT_REPL_CHANGE_MANAGER_OUT_FILE="${TMP_DIR}/initReplChangeManager.out"
   beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
@@ -81,13 +82,13 @@ if [[ $(cat ${dump_lockfile}) == $$ ]]; then
 fi
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
+DUMP_PATH=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+DUMP_TXID=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
 
-if [[ "${dump_path}" != "${REPL_ROOT}"* ]]; then
+if [[ "${DUMP_PATH}" != "${REPL_ROOT}"* ]]; then
   printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
   return 0
 else
@@ -112,19 +113,19 @@ local out_file="${TMP_DIR}/repl_incdump_beeline.out"
 beeline -u ${SOURCE_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
  --hivevar dbname=${DBNAME} \
- --hivevar last_repl_id=${last_repl_id} \
+ --hivevar last_repl_id=${LAST_REPL_ID} \
  -f ${hql_file} \
  > ${out_file} \
  2>>${REPL_LOG_FILE}
 
 # Extract dump path and transaction id from the output
-dump_path=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
-dump_txid=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
+DUMP_PATH=$(awk -F\| '(NR==4){gsub(/ /,"", $2);print $2}' ${out_file})
+DUMP_TXID=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
 
-if [[ "${dump_path}" != "${REPL_ROOT}"* ]]
+if [[ "${DUMP_PATH}" != "${REPL_ROOT}"* ]]
  then
   printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
   return 0
@@ -146,12 +147,13 @@ local hql_file=$1
 local retry_counter=1
 local retval=1
 
-while [[ ${retry_counter} -le $INCR_RERUN ]]
+# Retry a failed incremental repl load upto $INCR_RERUN times
+while [[ ${retry_counter} -le ${INCR_RERUN} ]]
 do
   if [[ ${retry_counter} -gt 1 ]]
   then
       printmessage " INFO: Sleeping ${RERUN_SLEEP} seconds before retry"
-      RERUN_SLEEP
+      sleep ${RERUN_SLEEP}
       printmessage " INFO: Retrying load. Attempt number: ${retry_counter}"
   fi
   beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
