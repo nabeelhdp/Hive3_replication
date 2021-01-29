@@ -143,7 +143,7 @@ local dbname=$1
 local dbvalidity=1
 for db in ${DBLIST}; do
     if [[ "${dbname}" == "${db}" ]]; then
-      printmessage " INFO: Database nane ${dbname} validated successfully."
+      echo " INFO: Database nane ${dbname} validated successfully."
       dbvalidity=0
     fi
 done
