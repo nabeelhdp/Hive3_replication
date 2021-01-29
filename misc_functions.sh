@@ -19,7 +19,7 @@ trap_log_int() {
     local lock_file="${RUN_DIR}/$1"
     # A second script checking the lock and exiting should not remove the lock
     # of the first instance which is running. Henc adding a pid check
-    if [[ $(cat ${lock_file}) == $$ ]]; then
+    if [[ $(cat "${lock_file}") == $$ ]]; then
       printmessage " INFO: Removing lock file ${lock_file}"
       rm  ${lock_file}
     fi
@@ -29,7 +29,7 @@ trap_log_int() {
   ## remove the lock as we are aborting!
   local dump_lockfile=${RUN_DIR}/dump.lock
   if [[ -e "${dump_lockfile}" ]]; then
-    if [[$(cat ${dump_lockfile}) == $$]]; then
+    if [[$(cat "${dump_lockfile}") == $$ ]]; then
       printmessage " INFO: Removing Dump lock file ${lock_file}"
       rm  ${dump_lockfile}
     fi
@@ -51,7 +51,7 @@ trap_log_exit() {
     # A second script checking the lock and exiting should not remove the lock
     # of the first instance which is running. Henc adding a pid check
     if [[ -e "${lock_file}" ]]; then
-      if [[ $(cat "${lock_file}") == $$]]; then
+      if [[ $(cat "${lock_file}") == $$ ]]; then
         printmessage " INFO: Removing lock file ${lock_file}"
         rm  ${lock_file}
       fi
@@ -64,7 +64,7 @@ trap_log_exit() {
   ## If dump lock exists and is created by the current process, 
   ## remove the lock since dump is now complete
   if [[ -e "${dump_lockfile}" ]]; then
-    if [[$(cat "${dump_lockfile}") == $$]]; then
+    if [[ $(cat "${dump_lockfile}") == $$ ]]; then
       printmessage " INFO: Removing Dump lock file ${dump_lockfile}"
       rm  ${dump_lockfile}
     fi
@@ -87,6 +87,9 @@ trap_log_exit() {
 
 upload_logs_to_hdfs() {
 
+# ----------------------------------------------------------------------------
+# Upload the $REPL_LOG_FILE to an HDFS location for remote access
+#
   # Check if upload directory exists in HDFS
   hdfs dfs -test -d ${HDFS_UPLOAD_DIR}
   local dirtest_retval=$?
@@ -128,7 +131,7 @@ if [[ -e "${lock_file}" ]]; then
     fi
 fi
 ## Create the lockfile by printing the script's PID into it
-echo $$ > ${lock_file}
+echo $$ > "${lock_file}"
 }
 
 check_db_validity() {
@@ -139,7 +142,7 @@ local dbname=$1
 local dbvalidity=1
 for db in ${DBLIST}; do
     if [[ "${dbname}" == "${db}" ]]; then
-      echo " INFO: Database name ${dbname} validated successfully."
+      echo "INFO: Database name ${dbname} validated successfully."
       dbvalidity=0
     fi
 done
