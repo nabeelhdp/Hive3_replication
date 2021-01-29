@@ -95,21 +95,12 @@ if [[ "${LAST_REPL_ID}" == "NULL" ]]; then
   # If dump is generated successfully, a proper integer value is returned.
   if [[ "${DUMP_TXID}" -gt 0 ]]; then
     printmessage " INFO: Initiating data load at target cluster on database ${DBNAME}."
-
-    # Point to corresponding HQL file depending on whether external tables are to be included or not
-    if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
-      printmessage " INFO: External tables included. This may trigger distcp jobs in background."
-      HQL_FILE=${EXT_LOAD_HQL}
-    else 
-      printmessage " INFO: External tables not included."
-      HQL_FILE=${LOAD_HQL}
-    fi 
     
     # Override the variable INCR_RERUN and set it to 1 to disable retries for bootstrap load. 
     INCR_RERUN=1
     # Now the source cluster has generated a full dump of the database. 
     # Replay the full dump on the target cluster database.
-    if replay_dump_at_target ${HQL_FILE}; then 
+    if replay_dump_at_target ; then 
       printmessage " INFO: Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
       if [[ "${POST_LOAD_REPL_ID}" == "${DUMP_TXID}" ]] ; then
@@ -156,18 +147,9 @@ elif [[ ${LAST_REPL_ID} =~ ${TXN_ID_REGEX} ]] ; then
   if [[ "${DUMP_TXID}" -gt 0 ]]; then
     printmessage " INFO: Initiating REPL LOAD at destination cluster to replicate ${DBNAME} to transaction id |${DUMP_TXID}|."
     
-    # Point to corresponding HQL file depending on whether external tables are to be included or not
-    if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
-      printmessage " INFO: External tables included. This may trigger distcp jobs in background."
-      HQL_FILE=${EXT_LOAD_HQL}
-    else 
-      printmessage " INFO: External tables not included."
-      HQL_FILE=${LOAD_HQL}
-    fi 
-        
     # Now the source cluster has generated a dump of the database. 
     # Replay the dump on the target cluster database.
-    if replay_dump_at_target ${HQL_FILE}; then 
+    if replay_dump_at_target ; then 
       printmessage " INFO: Data load at target cluster completed. Verifying...." 
       retrieve_post_load_target_repl_id
       if [[ "${POST_LOAD_REPL_ID}" == "${DUMP_TXID}" ]] ; then
