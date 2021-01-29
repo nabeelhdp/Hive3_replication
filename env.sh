@@ -10,6 +10,9 @@ INCLUDE_EXTERNAL_TABLES=false   # [true|false]
 # location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix
 REPL_ROOT="/apps/hive/repl"
 
+# Comma separated list of acceptable dbnames. This is for a sanity check on the argument passed to script.
+DBLIST="repltest exttbl_db"
+
 # Prefix to access HDFS locations at source cluster as accessed from target
 #SOURCE_HDFS_PREFIX="hdfs://c2186"
 SOURCE_HDFS_PREFIX="hdfs://c2186-node2.coelab.cloudera.com:8020"
