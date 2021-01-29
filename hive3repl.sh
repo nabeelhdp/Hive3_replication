@@ -50,7 +50,7 @@ if check_db_validity $1; then
   # first argument is the db name if validity check is passed
   DBNAME=$1
 else
-  echo " ERROR: Database name ${dbname} not listed in env.sh. Aborting!"
+  echo " ERROR: Database name ${DBNAME} not listed in env.sh. Aborting!"
   exit 1
 fi
 
@@ -61,6 +61,7 @@ REPL_LOG_FILE="${LOG_DIR}/replication_${DBNAME}_${CURRENT_TIME}.log"
 # Optional db level lock to avoid overlapping runs for same database.
 # Defaults to false, i.e. no locking in place. 
 # Use flock when invoking script as an alternative if needed.
+lock_name=""
 if [[ "${APPLY_DB_LOCK}" == "true" ]]; then
   lock_name=${SCRIPT_NAME}_${DBNAME}.lock
   check_instance_lock ${lock_name}
@@ -133,7 +134,7 @@ if [[ "${LAST_REPL_ID}" == "NULL" ]]; then
       exit 1
     fi 
         
-  # If source_latest_txid is anything but a proper number, 
+  # If DUMP_TXID is anything but a proper number, 
   # it indicates a failure in geenerating the source dump. Exit.
   else
     printmessage " ERROR: Unable to generate full dump for database ${DBNAME}. Exiting!."
@@ -144,7 +145,7 @@ if [[ "${LAST_REPL_ID}" == "NULL" ]]; then
 # trigger the source dump as an incremental dump.
 elif [[ ${LAST_REPL_ID} =~ ${TXN_ID_REGEX} ]] ; then
   # adding | | around variable names to detect whitespace in parsed output
-  printmessage " INFO: Database ${DBNAME} transaction ID at target is cu{r}ntly |${LAST_REPL_ID}|"
+  printmessage " INFO: Database ${DBNAME} transaction ID at target is currently |${LAST_REPL_ID}|"
   
   # Generate incremental dump at source
   gen_incremental_dump_source
@@ -154,7 +155,6 @@ elif [[ ${LAST_REPL_ID} =~ ${TXN_ID_REGEX} ]] ; then
 
   if [[ "${DUMP_TXID}" -gt 0 ]]; then
     printmessage " INFO: Database ${DBNAME} incremental dump has been generated at |${SOURCE_HDFS_PREFIX}${DUMP_PATH}|."
-    # the calculation of txn_count below doesn't match with numEvents that show up in the 
     printmessage " INFO: Initiating REPL LOAD at destination cluster to replicate ${DBNAME} to transaction id |${DUMP_TXID}|."
     
     # Point to corresponding HQL file depending on whether external tables are to be included or not
@@ -183,7 +183,7 @@ elif [[ ${LAST_REPL_ID} =~ ${TXN_ID_REGEX} ]] ; then
         printmessage " WARN: This may happen if there is another REPL LOAD in progress with a later copy of the source dump"
       else
         printmessage " ERROR: Unable to verify database replication! Post Load repl id: |${POST_LOAD_REPL_ID}|"
-        printmessage " ERROR: Source repl id: |${DUMP_TXID}|"    
+        printmessage " ERROR: Source dump repl id: |${DUMP_TXID}|"    
         exit 1
       fi
     else 
