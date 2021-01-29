@@ -124,7 +124,7 @@ if [[ "${DUMP_PATH}" == "${REPL_ROOT}"* ]]; then
   printmessage " INFO: Database ${DBNAME} full dump has been generated at |${SOURCE_HDFS_PREFIX}${DUMP_PATH}|."
   printmessage " INFO: The current transaction ID at source is |${DUMP_TXID}|"
 else
-  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
+  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source"
 fi
 }
 
@@ -172,7 +172,7 @@ if [[ "${DUMP_PATH}" == "${REPL_ROOT}"* ]]; then
   printmessage " INFO: Database ${DBNAME} incremental dump has been generated at |${SOURCE_HDFS_PREFIX}${DUMP_PATH}|."
   printmessage " INFO: The current transaction ID at source is |${DUMP_TXID}|"
 else
-  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
+  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source"
 fi
 }
 
