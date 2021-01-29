@@ -4,6 +4,16 @@ retrieve_current_target_repl_id() {
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target before replication
 #
+# Globals modified by function:
+#   LAST_REPL_ID
+# Arguments:
+#   None
+# Outputs:
+#   Writes to local value for $out_file
+#   Logs to REPL_LOG_FILE
+# Returns:
+#   No specific value
+# ----------------------------------------------------------------------------
 local out_file="${TMP_DIR}/repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
@@ -18,6 +28,16 @@ retrieve_post_load_target_repl_id() {
 # ----------------------------------------------------------------------------
 # Retrieve current last_repl_id for database at target after replication
 #
+# Globals modified by function:
+#   POST_LOAD_REPL_ID
+# Arguments:
+#   None
+# Outputs:
+#   Writes to local value for $out_file
+#   Logs to REPL_LOG_FILE
+# Returns:
+#   No specific value
+# ----------------------------------------------------------------------------
 local out_file="${TMP_DIR}/post_load_repl_status_beeline.out"
 beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
  -n ${BEELINE_USER} \
@@ -32,6 +52,19 @@ gen_bootstrap_dump_source() {
 # ----------------------------------------------------------------------------
 # dump entire database at source hive instance for first time
 #
+# Globals modified by function:
+#   DUMP_PATH
+#   DUMP_TXID
+# Arguments:
+#   None
+# Outputs:
+#   Writes to local value for $out_file
+#   Logs to REPL_LOG_FILE
+#   Creates lock file $dump_lockfile and deletes at end of function
+# Returns:
+#   1 : Dump successful
+#   0 : Dump failure
+# ----------------------------------------------------------------------------
 
 # Point to corresponding HQL file depending on whether external tables are to be included or not
 local hql_file=""
@@ -100,8 +133,21 @@ gen_incremental_dump_source() {
 # ----------------------------------------------------------------------------
 # dump database at source hive instance from the last_repl_id at target
 #
+# Globals modified by function:
+#   DUMP_PATH
+#   DUMP_TXID
+# Arguments:
+#   None
+# Outputs:
+#   Writes to local value for $out_file
+#   Logs to REPL_LOG_FILE
+# Returns:
+#   1 : Dump successful
+#   0 : Dump failure
+# ----------------------------------------------------------------------------
+
+# Point to corresponding HQL file depending on whether external tables are to be included or not
 local hql_file=""
-# dump generation command returns latest transaction id at source
 if [[ "${INCLUDE_EXTERNAL_TABLES}" == "true" ]]; then
   printmessage " INFO: Including external tables in incremental dump"
   hql_file=${EXT_INC_DUMP_HQL}
@@ -139,9 +185,19 @@ replay_dump_at_target(){
 # ----------------------------------------------------------------------------
 # Load database at target from hdfs location in source
 #
+# Globals modified by function:
+#   None
+# Arguments:
+#   HQL file value
+# Outputs:
+#   Writes to local value for $out_file
+#   Logs to REPL_LOG_FILE
+# Returns:
+#   Beeline return value
+# ----------------------------------------------------------------------------
 
 # Add prefix for source cluster to dump directory when running at target cluster
-SOURCE_DUMP_PATH="${SOURCE_HDFS_PREFIX}${DUMP_PATH}"
+local source_dump_path="${SOURCE_HDFS_PREFIX}${DUMP_PATH}"
 local out_file="${TMP_DIR}/repl_load_beeline.out"
 local hql_file=$1
 local retry_counter=1
@@ -159,7 +215,7 @@ do
   beeline -u ${TARGET_JDBC_URL} ${BEELINE_OPTS} \
     -n ${BEELINE_USER} \
     --hivevar dbname=${DBNAME} \
-    --hivevar src_dump_path=${SOURCE_DUMP_PATH} \
+    --hivevar src_dump_path=${source_dump_path} \
     -f ${hql_file} \
     >${out_file} \
     2>>${REPL_LOG_FILE}
