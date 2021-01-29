@@ -138,7 +138,7 @@ if [[ "${LAST_REPL_ID}" == "NULL" ]]; then
   else  
     printmessage " ERROR: Invalid transaction id returned from Source : |${DUMP_TXID}|"
     # Print error message to console
-    local errormsg=$(egrep -e ^Error -e ^ERROR -e FAILED ${REPL_LOG_FILE} | tail -1)
+    errormsg=$(egrep -e ^Error -e ^ERROR -e FAILED ${REPL_LOG_FILE} | tail -1)
     echo "${errormsg}"
     printmessage " ERROR: Unable to generate full dump for database ${DBNAME}. Exiting!."
     exit 1
@@ -193,7 +193,7 @@ elif [[ ${LAST_REPL_ID} =~ ${TXN_ID_REGEX} ]] ; then
   else
     printmessage " ERROR: Invalid transaction id returned from Source : |${DUMP_TXID}|"
     # Print error message to console
-    local errormsg=$(egrep -e ^Error -e ^ERROR -e FAILED ${REPL_LOG_FILE} | tail -1)
+    errormsg=$(egrep -e ^Error -e ^ERROR -e FAILED ${REPL_LOG_FILE} | tail -1)
     echo "${errormsg}"
     printmessage " ERROR: Unable to generate incremental dump for database ${DBNAME}. Exiting!."
     exit 1
