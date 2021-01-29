@@ -62,8 +62,7 @@ gen_bootstrap_dump_source() {
 #   Logs to REPL_LOG_FILE
 #   Creates lock file $dump_lockfile and deletes at end of function
 # Returns:
-#   1 : Dump successful
-#   0 : Dump failure
+#   None
 # ----------------------------------------------------------------------------
 
 # Point to corresponding HQL file depending on whether external tables are to be included or not
@@ -121,11 +120,11 @@ DUMP_TXID=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
 
-if [[ "${DUMP_PATH}" != "${REPL_ROOT}"* ]]; then
-  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
-  return 0
+if [[ "${DUMP_PATH}" == "${REPL_ROOT}"* ]]; then
+  printmessage " INFO: Database ${DBNAME} full dump has been generated at |${SOURCE_HDFS_PREFIX}${DUMP_PATH}|."
+  printmessage " INFO: The current transaction ID at source is |${DUMP_TXID}|"
 else
-  return 1
+  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
 fi
 }
 
@@ -142,8 +141,7 @@ gen_incremental_dump_source() {
 #   Writes to local value for $out_file
 #   Logs to REPL_LOG_FILE
 # Returns:
-#   1 : Dump successful
-#   0 : Dump failure
+#   None
 # ----------------------------------------------------------------------------
 
 # Point to corresponding HQL file depending on whether external tables are to be included or not
@@ -170,13 +168,11 @@ DUMP_TXID=$(awk -F\| '(NR==4){gsub(/ /,"", $3);print $3}' ${out_file})
 
 # Confirm database dump succeeded by verifying if location string returned 
 # begins with configured location for replication dump.
-
-if [[ "${DUMP_PATH}" != "${REPL_ROOT}"* ]]
- then
-  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
-  return 0
+if [[ "${DUMP_PATH}" == "${REPL_ROOT}"* ]]; then
+  printmessage " INFO: Database ${DBNAME} incremental dump has been generated at |${SOURCE_HDFS_PREFIX}${DUMP_PATH}|."
+  printmessage " INFO: The current transaction ID at source is |${DUMP_TXID}|"
 else
-  return 1
+  printmessage " ERROR: Could not generate database dump for ${DBNAME} at source.\n"
 fi
 }
 
