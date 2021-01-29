@@ -8,15 +8,15 @@ Tested on HDP 3.1.4. but it is recommended to use HDP 3.1.5 or CDP versions for 
 # Files :
 * `env.sh` : Configure environment variables here before running the script.
 * `hive3repl.sh` : Main script to invoke. Run as shown later in the doc.
-* `beeline-functions.sh` : Functions that make beeline calls are defined here.
-* `init-variables.sh` : All global variables are initialized here. Do not change anything here.
-* `misc-functions.sh` : Some miscellaneous functions for logging etc are defined here.
+* `beeline_functions.sh` : Functions that make beeline calls are defined here.
+* `init_variables.sh` : All global variables are initialized here. Do not change anything here.
+* `misc_functions.sh` : Some miscellaneous functions for logging etc are defined here.
 
 # Configs
 | Parameter | Description |
 | ----------- | ----------- |
-| TARGET_JDBC_URL      | JDBC URL for target cluster. Copy this value from the Ambari UI.       |
-| SOURCE_JDBC_URL   |  JDBC URL for source cluster. Copy this value from the Ambari UI.        |
+|TARGET_JDBC_URL      | JDBC URL for target cluster. Copy this value from the Ambari UI.       |
+|SOURCE_JDBC_URL   |  JDBC URL for source cluster. Copy this value from the Ambari UI.        |
 |INCLUDE_EXTERNAL_TABLES|true/false|
 |REPL_ROOT|location in source hdfs where dump data will be written. This is used only to verify REPL DUMP output starting suffix |
 |SOURCE_HDFS_PREFIX|Prefix to access HDFS locations at source cluster as accessed from target. Can use the Namenode IP:port or cluster nameservice id. Eg. `hdfs://c2186-node2.coelab.cloudera.com:8020` or `hdfs://c2186`"|
