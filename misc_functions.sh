@@ -53,7 +53,6 @@ trap_log_int() {
       rm  ${dump_lockfile}
     fi
   fi
-  printmessage " INFO: Lock files removed"
 }
 
 trap_log_exit() {
@@ -99,7 +98,6 @@ trap_log_exit() {
     fi
   fi
   
-  printmessage " INFO: Lock files removed"
   local duration=$SECONDS
   printmessage " INFO: Script run took $(($duration / 60)) minutes and $(($duration % 60)) seconds "
 
